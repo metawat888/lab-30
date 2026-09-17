@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard อนุกรมวิธานสิ่งมีชีวิต (5 Kingdoms Taxonomy)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/30 text-slate-800 h-full flex flex-col overflow-hidden">
+
+    <header class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white shadow-lg flex-none z-20 border-b border-emerald-600/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-3 rounded-2xl border border-emerald-400/40 shadow-md">
+                    <i class="fa-solid fa-dna text-2xl text-emerald-100 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide flex items-center space-x-2">
+                        <span>ระบบอนุกรมวิธาน 5 อาณาจักร</span>
+                        <span class="text-xs bg-emerald-600/80 text-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-500/50 font-normal hidden sm:inline-block">Taxonomy System</span>
+                    </h1>
+                    <p class="text-xs text-emerald-200/90 font-light hidden sm:block mt-0.5">จัดการและสำรวจลำดับขั้นสิ่งมีชีวิต (Kingdom ถึง Species และ Super/Sub Taxon)</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- Developer Profile Badge -->
+                <div class="hidden md:flex items-center space-x-2.5 bg-emerald-900/60 px-3 py-1.5 rounded-full border border-emerald-600/50 shadow-inner">
+                    <img src="https://raw.githubusercontent.com/metawat888/Picture/69f9d3a46e017adc43abb8db3503ea8106ecae61/97488303_2887790847941184_353651305119481856_n.jpg" alt="Metawat Phongsaphang" class="w-8 h-8 rounded-full object-cover border-2 border-emerald-400/60 shadow-sm">
+                    <div class="text-left pr-1">
+                        <p class="text-[11px] font-bold text-white leading-tight">Metawat Phongsaphang</p>
+                        <p class="text-[9px] text-emerald-300 font-light">ผู้พัฒนาระบบ</p>
+                    </div>
+                </div>
+
+                <button onclick="openAddModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-md hover:shadow-emerald-500/20 flex items-center space-x-2 border border-emerald-400/30">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>เพิ่มอนุกรมวิธาน</span>
+                </button>
+                <div class="hidden md:flex items-center space-x-2 bg-emerald-900/50 px-3.5 py-2 rounded-xl border border-emerald-600/40 text-xs text-emerald-100 shadow-inner">
+                    <i class="fa-solid fa-database text-emerald-400"></i>
+                    <span id="headerTotalCount" class="font-semibold">0 รายการ</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
+        
+        <!-- Sidebar / Navigation Tree Panel -->
+        <div class="w-full lg:w-80 bg-white/90 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden hidden lg:flex flex-none">
+            <div class="p-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
+                <h2 class="font-bold text-slate-700 flex items-center space-x-2.5 text-sm">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-sitemap"></i>
+                    </div>
+                    <span>5 อาณาจักรสิ่งมีชีวิต</span>
+                </h2>
+                <span id="kingdomCountBadge" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full shadow-2xs">0</span>
+            </div>
+            
+            <div class="p-3 border-b border-slate-100 bg-white">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-filter text-xs"></i>
+                    </span>
+                    <select id="kingdomFilterSelect" onchange="filterByKingdom(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                        <option value="ALL">🌟 ทุกอาณาจักร (All Kingdoms)</option>
+                        <option value="Animalia">🐾 อาณาจักรสัตว์ (Animalia)</option>
+                        <option value="Plantae">🌿 อาณาจักรพืช (Plantae)</option>
+                        <option value="Fungi">🍄 อาณาจักรฟังใจ (Fungi)</option>
+                        <option value="Protista">💧 อาณาจักรโพรทีสตา (Protista)</option>
+                        <option value="Monera">🦠 อาณาจักรมอเนอรา (Monera)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2" id="kingdomListContainer">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="p-4 m-3 bg-gradient-to-br from-slate-900 to-emerald-950 text-white rounded-2xl text-xs space-y-2 shadow-sm">
+                <div class="font-bold text-emerald-300 flex items-center space-x-2">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>ลำดับขั้นอนุกรมวิธาน (Taxon)</span>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-[11px]">
+                    Kingdom ➔ Phylum/Division ➔ Class ➔ Order ➔ Family ➔ Genus ➔ Species <span class="text-emerald-400 font-semibold">(พร้อม Super/Sub ย่อยตามความเหมาะสม)</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col bg-white/90 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+            
+            <!-- Compact Statistics Banner Cards -->
+            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                    <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+                    <span>สรุปจำนวน:</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-white border border-slate-200 text-[11px] font-medium text-slate-700">
+                        <span>ทั้งหมด: <strong id="statTotal" class="text-slate-900 ml-0.5">0</strong></span>
+                    </span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-[11px] font-medium text-blue-800">
+                        <span>สัตว์: <strong id="statAnimalia" class="ml-0.5">0</strong></span>
+                    </span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-medium text-emerald-800">
+                        <span>พืช: <strong id="statPlantae" class="ml-0.5">0</strong></span>
+                    </span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-800">
+                        <span>ฟังใจ: <strong id="statFungi" class="ml-0.5">0</strong></span>
+                    </span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-purple-50 border border-purple-200 text-[11px] font-medium text-purple-800">
+                        <span>อื่นๆ: <strong id="statOthers" class="ml-0.5">0</strong></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Toolbar (Search & Filter Actions) -->
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white">
+                <div class="relative w-full sm:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search text-xs"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาวิทยาศาสตร์, ชื่อไทย, วงศ์, สปีชีส์..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                </div>
+                <div class="flex items-center space-x-2.5 w-full sm:w-auto justify-end">
+                    <span class="text-xs text-slate-500 font-medium">จัดเรียง:</span>
+                    <select id="sortBy" onchange="handleSort()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition font-medium">
+                        <option value="name_asc">ชื่อวิทยาศาสตร์ (A-Z)</option>
+                        <option value="name_desc">ชื่อวิทยาศาสตร์ (Z-A)</option>
+                        <option value="kingdom">ตามอาณาจักร (Kingdom)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 bg-gradient-to-b from-slate-50/40 to-white">
+                <div id="taxonomyGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl mb-3 shadow-inner">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-700">ไม่พบข้อมูลอนุกรมวิธาน</h3>
+                    <p class="text-xs text-slate-400 mt-1">ลองเปลี่ยนคำค้นหาหรือเพิ่มข้อมูลใหม่ในระบบ</p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-slate-100">
+            <div class="bg-gradient-to-r from-emerald-700 to-teal-700 text-white p-5 px-6 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-emerald-200">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <h3 class="font-bold text-base" id="modalTitle">รายละเอียดอนุกรมวิธาน</h3>
+                </div>
+                <button onclick="closeDetailModal()" class="text-emerald-200 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6" id="modalContentBody">
+                <!-- Content populated dynamically -->
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button onclick="closeDetailModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow-2xs">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="formModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-slate-100">
+            <div class="bg-gradient-to-r from-emerald-700 to-teal-700 text-white p-5 px-6 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-emerald-200">
+                        <i class="fa-solid fa-plus-circle"></i>
+                    </div>
+                    <h3 class="font-bold text-base" id="formModalTitle">เพิ่มข้อมูลอนุกรมวิธาน</h3>
+                </div>
+                <button onclick="closeFormModal()" class="text-emerald-200 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="taxonomyForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <input type="hidden" id="editIndex" value="-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชื่อวิทยาศาสตร์ (Scientific Name)*</label>
+                        <input type="text" id="sciNameInput" required placeholder="เช่น Panthera tigris" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชื่อสามัญ / ชื่อไทย (Common Name)</label>
+                        <input type="text" id="commonNameInput" placeholder="เช่น เสือโคร่ง" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">อาณาจักร (Kingdom)*</label>
+                        <select id="kingdomInput" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition font-medium">
+                            <option value="Animalia">🐾 อาณาจักรสัตว์ (Animalia)</option>
+                            <option value="Plantae">🌿 อาณาจักรพืช (Plantae)</option>
+                            <option value="Fungi">🍄 อาณาจักรฟังใจ (Fungi)</option>
+                            <option value="Protista">💧 อาณาจักรโพรทีสตา (Protista)</option>
+                            <option value="Monera">🦠 อาณาจักรมอเนอรา (Monera)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5" id="phylumLabel">ไฟลัม / ดิวิชัน (Phylum / Division)</label>
+                        <input type="text" id="phylumInput" placeholder="เช่น Chordata หรือ Tracheophyta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชั้น (Class)</label>
+                        <input type="text" id="classInput" placeholder="เช่น Mammalia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">อันดับ (Order)</label>
+                        <input type="text" id="orderInput" placeholder="เช่น Carnivora" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">วงศ์ (Family)</label>
+                        <input type="text" id="familyInput" placeholder="เช่น Felidae" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">สกุล (Genus)</label>
+                        <input type="text" id="genusInput" placeholder="เช่น Panthera" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">สปีชีส์ (Species)</label>
+                        <input type="text" id="speciesInput" placeholder="เช่น Panthera tigris" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ขั้นย่อยพิเศษ (Super/Sub Taxon)</label>
+                        <input type="text" id="subLevelInput" placeholder="เช่น Subspecies: P. t. corbetti" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ลิงก์รูปภาพสิ่งมีชีวิต (Image URL)</label>
+                        <input type="url" id="imageUrlInput" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ลิงก์ข้อมูลวิกิพีเดีย / อ้างอิง</label>
+                        <input type="url" id="wikiUrlInput" placeholder="https://th.wikipedia.org/wiki/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">ลักษณะเด่นและคำอธิบาย (Description)</label>
+                    <textarea id="descInput" rows="3" placeholder="ระบุลักษณะทางชีวภาพ ข้อมูลเชิงอนุกรมวิธาน..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeFormModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-semibold transition">ยกเลิก</button>
+                    <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-6 py-2.5 rounded-xl text-xs font-semibold transition shadow-md">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center space-x-3 text-xs border border-slate-800">
+        <i id="toastIcon" class="fa-solid fa-check text-emerald-400 text-base"></i>
+        <span id="toastMessage" class="font-medium">บันทึกข้อมูลสำเร็จ</span>
+    </div>
+
+    <script>
+        // Representative Kingdom cover images matching the 5 biological kingdoms with updated Plantae image
+        const kingdomImages = {
+            "Animalia": "https://github.com/metawat888/Picture/raw/b8460fb84f6fd5373755857dad23ff2de60b8ee1/9803a62c-2618-43fc-bfd2-bc8954f0ca03.webp", // Animal kingdom representative updated
+            "Plantae": "https://github.com/metawat888/Picture/blob/6d154055f9cd710a0eeda08852985565b05bf891/พืช.png?raw=true",  // Plant kingdom representative updated
+            "Fungi": "https://github.com/metawat888/Picture/raw/ea1b331a17ac2392b2b6427ed970106e43d05656/122627531.jpeg",    // Fungi kingdom representative updated to GitHub asset URL
+            "Protista": "https://github.com/metawat888/Picture/raw/f1101ff4bcc1f22ac12d6e6f0675bef62be86962/f12f8cbc-527c-4b49-90a3-68065745d159.jpeg", // Protista kingdom representative updated to GitHub asset URL
+            "Monera": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&w=600&q=80"    // Monera kingdom representative (Bacteria microorganisms)
+        };
+
+        let taxonomyData = [
+            {
+                sciName: "Panthera tigris",
+                commonName: "เสือโคร่ง (Tiger)",
+                kingdom: "Animalia",
+                phylum: "Chordata (ไฟลัม)",
+                class: "Mammalia (คลาส)",
+                order: "Carnivora (ออเดอร์)",
+                family: "Felidae (แฟมิลี)",
+                genus: "Panthera (จีนัส)",
+                species: "Panthera tigris",
+                subLevel: "Subspecies: P. t. corbetti",
+                description: "สัตว์เลี้ยงลูกด้วยนมในวงศ์เสือและแมว เป็นสัตว์ป่าคุ้มครองใกล้สูญพันธุ์ มีลวดลายแถบสีดำบนพื้นขนสีส้ม",
+                wikiUrl: "https://th.wikipedia.org/wiki/เสือโคร่ง"
+            },
+            {
+                sciName: "Cocos nucifera",
+                commonName: "มะพร้าว (Coconut)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta (ดิวิชันสำหรับพืช)",
+                class: "Liliopsida",
+                order: "Arecales",
+                family: "Arecaceae",
+                genus: "Cocos",
+                species: "Cocos nucifera",
+                subLevel: "-",
+                description: "พืชใบเลี้ยงเดี่ยวในวงศ์ปาล์ม ผลใช้ประโยชน์ได้หลากหลาย ทั้งน้ำและเนื้อมะพร้าว",
+                wikiUrl: "https://th.wikipedia.org/wiki/มะพร้าว"
+            },
+            {
+                sciName: "Amanita muscaria",
+                commonName: "เห็ดฟลายอการ์ิก (Fly Agaric)",
+                kingdom: "Fungi",
+                phylum: "Basidiomycota (ไฟลัม)",
+                class: "Agaricomycetes",
+                order: "Agaricales",
+                family: "Amanitaceae",
+                genus: "Amanita",
+                species: "Amanita muscaria",
+                subLevel: "-",
+                description: "เห็ดพิษและเห็ดเมาที่มีลักษณะเด่นคือหมวกสีแดงสดมีจุดแต้มสีขาว",
+                wikiUrl: "https://en.wikipedia.org/wiki/Amanita_muscaria"
+            },
+            {
+                sciName: "Paramecium caudatum",
+                commonName: "พารามีเซียม (Paramecium)",
+                kingdom: "Protista",
+                phylum: "Ciliophora",
+                class: "Oligohymenophorea",
+                order: "Peniculida",
+                family: "Parameciidae",
+                genus: "Paramecium",
+                species: "Paramecium caudatum",
+                subLevel: "Subclass: Peniculia",
+                description: "สิ่งมีชีวิตเซลล์เดียวขนาดเล็ก มีรูปร่างคล้ายพื้นรองเท้า พบได้ตามแหล่งน้ำจืดทั่วไป ขยับด้วยซีเลีย",
+                wikiUrl: "https://th.wikipedia.org/wiki/พารามีเซียม"
+            },
+            {
+                sciName: "Escherichia coli",
+                commonName: "แบคทีเรียอีโคไล (E. coli)",
+                kingdom: "Monera",
+                phylum: "Pseudomonadota (ไฟลัมแบคทีเรีย)",
+                class: "Gammaproteobacteria",
+                order: "Enterobacteriales",
+                family: "Enterobacteriaceae",
+                genus: "Escherichia",
+                species: "Escherichia coli",
+                subLevel: "Subspecies: K-12 strain",
+                description: "แบคทีเรียโปรคาริโอตไม่มีเยื่อหุ้มนิวเคลียส รูปแท่ง พบได้ทั่วไปในลำไส้สิ่งมีชีวิตเลือดอุ่น",
+                wikiUrl: "https://th.wikipedia.org/wiki/อีโคไล"
+            },
+            {
+                sciName: "Elephas maximus",
+                commonName: "ช้างเอเชีย (Asian Elephant)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Proboscidea",
+                family: "Elephantidae",
+                genus: "Elephas",
+                species: "Elephas maximus",
+                subLevel: "Subspecies: E. m. indicus",
+                description: "สัตว์เลี้ยงลูกด้วยนมขนาดใหญ่ที่มีงวงและงา เป็นสัตว์ประจำชาติและสัญลักษณ์ทางวัฒนธรรมไทย",
+                wikiUrl: "https://th.wikipedia.org/wiki/ช้างเอเชีย"
+            },
+            {
+                sciName: "Oryza sativa",
+                commonName: "ข้าวเจ้า (Rice)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Liliopsida",
+                order: "Poales",
+                family: "Poaceae",
+                genus: "Oryza",
+                species: "Oryza sativa",
+                subLevel: "Subspecies: Indica / Japonica",
+                description: "พืชเศรษฐกิจและอาหารหลักของประชากรส่วนใหญ่ในทวีปเอเชีย เป็นพืชตระกูลหญ้า",
+                wikiUrl: "https://th.wikipedia.org/wiki/ข้าว"
+            },
+            {
+                sciName: "Penicillium chrysogenum",
+                commonName: "ราเพนิซิลเลียม (Penicillium)",
+                kingdom: "Fungi",
+                phylum: "Ascomycota",
+                class: "Eurotiomycetes",
+                order: "Eurotiales",
+                family: "Aspergillaceae",
+                genus: "Penicillium",
+                species: "Penicillium chrysogenum",
+                subLevel: "Strain: Antibiotic producer",
+                description: "เชื้อรากลุ่มสำคัญที่ใช้ในการผลิตยาปฏิชีวนะเพนิซิลลินเพื่อรักษาโรคติดเชื้อแบคทีเรีย",
+                wikiUrl: "https://th.wikipedia.org/wiki/เพนิซิลลิน"
+            },
+            {
+                sciName: "Amoeba proteus",
+                commonName: "อะมีบา (Amoeba)",
+                kingdom: "Protista",
+                phylum: "Amoebozoa",
+                class: "Tubulinea",
+                order: "Tubulinida",
+                family: "Amoebidae",
+                genus: "Amoeba",
+                species: "Amoeba proteus",
+                subLevel: "Supergroup: Amorphea",
+                description: "โปรโตซัวเซลล์เดียวที่ไม่มีรูปร่างแน่นอน เคลื่อนที่และจับเหยื่อโดยการยื่นเท้าเทียม (Pseudopodia)",
+                wikiUrl: "https://th.wikipedia.org/wiki/อะมีบา"
+            },
+            {
+                sciName: "Lactobacillus bulgaricus",
+                commonName: "แลคโตบาซิลลัส (Lactobacillus)",
+                kingdom: "Monera",
+                phylum: "Bacillota",
+                class: "Bacilli",
+                order: "Lactobacillales",
+                family: "Lactobacillaceae",
+                genus: "Lactobacillus",
+                species: "Lactobacillus delbrueckii",
+                subLevel: "Subspecies: bulgaricus",
+                description: "แบคทีเรียกรดแลคติกชนิดดี ใช้ประโยชน์ในอุตสาหกรรมหมักนมและโยเกิร์ต",
+                wikiUrl: "https://th.wikipedia.org/wiki/แลคโตบาซิลลัส"
+            },
+            {
+                sciName: "Chelonia mydas",
+                commonName: "เต่าตนุ (Green Sea Turtle)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Reptilia",
+                order: "Testudines",
+                family: "Cheloniidae",
+                genus: "Chelonia",
+                species: "Chelonia mydas",
+                subLevel: "-",
+                description: "เต่าทะเลขนาดใหญ่ กินพืชน้ำและหญ้าทะเลเป็นอาหาร ใกล้สูญพันธุ์และอาศัยตามแนวปะการัง",
+                wikiUrl: "https://th.wikipedia.org/wiki/เต่าตนุ"
+            },
+            {
+                sciName: "Rosa hybrida",
+                commonName: "กุหลาบ (Rose)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Rosales",
+                family: "Rosaceae",
+                genus: "Rosa",
+                species: "Rosa hybrida",
+                subLevel: "Cultivar: Hybrid",
+                description: "ไม้พุ่มดอกสวยงามยอดนิยม มีหนามแหลมคมบริเวณลำต้น ดอกมีกลิ่นหอมและสีสันหลากหลาย",
+                wikiUrl: "https://th.wikipedia.org/wiki/กุหลาบ"
+            },
+            {
+                sciName: "Saccharomyces cerevisiae",
+                commonName: "ยีสต์ขนมปัง (Brewer's Yeast)",
+                kingdom: "Fungi",
+                phylum: "Ascomycota",
+                class: "Saccharomycetes",
+                order: "Saccharomycetales",
+                family: "Saccharomycetaceae",
+                genus: "Saccharomyces",
+                species: "Saccharomyces cerevisiae",
+                subLevel: "Strain: Baker's yeast",
+                description: "จุลินทรีย์ฟังใจเซลล์เดียวสำคัญที่ใช้ในการหมักเบียร์ ขนมปัง และอุตสาหกรรมอาหาร",
+                wikiUrl: "https://th.wikipedia.org/wiki/ยีสต์"
+            },
+            {
+                sciName: "Plasmodium falciparum",
+                commonName: "พลาสโมเดียม (Malaria parasite)",
+                kingdom: "Protista",
+                phylum: "Apicomplexa",
+                class: "Aconoidasida",
+                order: "Haemosporida",
+                family: "Plasmodiidae",
+                genus: "Plasmodium",
+                species: "Plasmodium falciparum",
+                subLevel: "-",
+                description: "โปรโตซัวปรสิตที่เป็นสาเหตุหลักของโรคมาลาเรียชนิดรุนแรงในมนุษย์ แพร่ผ่านยุงก้นปล่อง",
+                wikiUrl: "https://th.wikipedia.org/wiki/พลาสโมเดียม"
+            },
+            {
+                sciName: "Spirulina platensis",
+                commonName: "สาหร่ายเกลียวทอง (Spirulina)",
+                kingdom: "Monera",
+                phylum: "Cyanobacteria",
+                class: "Cyanophyceae",
+                order: "Nostocales",
+                family: "Microcoleaceae",
+                genus: "Arthrospira",
+                species: "Arthrospira platensis",
+                subLevel: "Superfood Cyanobacterium",
+                description: "แบคทีเรียสังเคราะห์แสงได้ (Cyanobacteria) รูปเกลียวสปริง อุดมด้วยโปรตีนและสารอาหารสูง",
+                wikiUrl: "https://th.wikipedia.org/wiki/สปิรูลินา"
+            },
+            {
+                sciName: "Panthera leo",
+                commonName: "สิงโต (Lion)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Carnivora",
+                family: "Felidae",
+                genus: "Panthera",
+                species: "Panthera leo",
+                subLevel: "Subspecies: P. l. leo",
+                description: "สัตว์เลี้ยงลูกด้วยนมในวงศ์เสือและแมวขนาดใหญ่ ฉายาเจ้าแห่งป่า อาศัยอยู่รวมกันเป็นฝูงในทุ่งหญ้าสะวันนา",
+                wikiUrl: "https://th.wikipedia.org/wiki/สิงโต"
+            },
+            {
+                sciName: "Helianthus annuus",
+                commonName: "ทานตะวัน (Sunflower)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Asterales",
+                family: "Asteraceae",
+                genus: "Helianthus",
+                species: "Helianthus annuus",
+                subLevel: "Cultivar: Common sunflower",
+                description: "พืชล้มลุกดอกสีเหลืองขนาดใหญ่ มีพฤติกรรมการหันดอกตามดวงอาทิตย์ (Heliotropism) เมล็ดให้น้ำมันทานตะวัน",
+                wikiUrl: "https://th.wikipedia.org/wiki/ทานตะวัน"
+            },
+            {
+                sciName: "Agaricus bisporus",
+                commonName: "เห็ดแชมปิญอง / เห็ดกระดุม (Button Mushroom)",
+                kingdom: "Fungi",
+                phylum: "Basidiomycota",
+                class: "Agaricomycetes",
+                order: "Agaricales",
+                family: "Agaricaceae",
+                genus: "Agaricus",
+                species: "Agaricus bisporus",
+                subLevel: "Cultivar: White button",
+                description: "เห็ดรับประทานได้ยอดนิยมทั่วโลก มีหมวกสีขาว เนื้อแน่น นิยมนำมาประกอบอาหารหลากหลายเมนู",
+                wikiUrl: "https://en.wikipedia.org/wiki/Agaricus_bisporus"
+            },
+            {
+                sciName: "Euglena gracilis",
+                commonName: "ยูกลีนา (Euglena)",
+                kingdom: "Protista",
+                phylum: "Euglenozoa",
+                class: "Euglenophyceae",
+                order: "Euglenales",
+                family: "Euglenaceae",
+                genus: "Euglena",
+                species: "Euglena gracilis",
+                subLevel: "-",
+                description: "โพรทิสต์เซลล์เดียวที่มีลักษณะก้ำกึ่งระหว่างพืชและสัตว์ มีคลอโรพลาสต์สร้างอาหารเองได้ และมีแฟลเจลลาใช้ว่ายน้ำ",
+                wikiUrl: "https://th.wikipedia.org/wiki/ยูกลีนา"
+            },
+            {
+                sciName: "Streptococcus pneumoniae",
+                commonName: "สเตปโตค็อกคัส นิวโมเนียอี (Pneumococcus)",
+                kingdom: "Monera",
+                phylum: "Bacillota",
+                class: "Bacilli",
+                order: "Lactobacillales",
+                family: "Streptococcaceae",
+                genus: "Streptococcus",
+                species: "Streptococcus pneumoniae",
+                subLevel: "Serotype: Capsulated strain",
+                description: "แบคทีเรียทรงกลมเรียงตัวเป็นสายยาว (Gram-positive) เป็นสาเหตุสำคัญของโรคปอดบวมและติดเชื้อในกระแสเลือด",
+                wikiUrl: "https://th.wikipedia.org/wiki/สเตปโตค็อกคัส_นิวโมเนียอี"
+            },
+            {
+                sciName: "Balaenoptera musculus",
+                commonName: "วาฬสีน้ำเงิน (Blue Whale)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Artiodactyla",
+                family: "Balaenopteridae",
+                genus: "Balaenoptera",
+                species: "Balaenoptera musculus",
+                subLevel: "Subspecies: B. m. musculus",
+                description: "สัตว์เลี้ยงลูกด้วยนมขนาดใหญ่ที่สุดในโลกที่เคยมีมาบนโลก อาศัยในมหาสมุทร กินเคย (Krill) เป็นอาหารหลัก",
+                wikiUrl: "https://th.wikipedia.org/wiki/วาฬสีน้ำเงิน"
+            },
+            {
+                sciName: "Pinus kesiya",
+                commonName: "สนสามใบ (Khasi Pine)",
+                kingdom: "Plantae",
+                phylum: "Pinophyta (ดิวิชันพืชเมล็ดเปลือย)",
+                class: "Pinopsida",
+                order: "Pinales",
+                family: "Pinaceae",
+                genus: "Pinus",
+                species: "Pinus kesiya",
+                subLevel: "-",
+                description: "พืชเมล็ดเปลือยยืนต้นขนาดใหญ่ ใบเป็นเข็มมัดละ 3 ใบ พบมากตามป่าสนเขาในเขตภาคเหนือของไทย",
+                wikiUrl: "https://th.wikipedia.org/wiki/สนสามใบ"
+            },
+            {
+                sciName: "Rhizopus stolonifer",
+                commonName: "ราดำขนมปัง (Black Bread Mold)",
+                kingdom: "Fungi",
+                phylum: "Zygomycota",
+                class: "Mucoromycetes",
+                order: "Mucorales",
+                family: "Mucoraceae",
+                genus: "Rhizopus",
+                species: "Rhizopus stolonifer",
+                subLevel: "Zygospore producer",
+                description: "เชื้อราที่พบขึ้นตามขนมปังหรือผลไม้เน่าเสีย มีเส้นใยฟูสีดำคล้ายเส้นผมและสร้างสปอร์ในการแพร่พันธุ์",
+                wikiUrl: "https://en.wikipedia.org/wiki/Rhizopus_stolonifer"
+            },
+            {
+                sciName: "Dinoflagellata",
+                commonName: "ไดโนแฟลเจลเลต (Dinoflagellate)",
+                kingdom: "Protista",
+                phylum: "Dinoflagellata",
+                class: "Dinophyceae",
+                order: "Peridiniales",
+                family: "Peridiniaceae",
+                genus: "Ceratium",
+                species: "Ceratium hirundinella",
+                subLevel: "Marine/Freshwater plankton",
+                description: "โพรทิสต์เซลล์เดียวมีเปลือกเซลลูโลสและแฟลเจลลา 2 เส้น เป็นสาเหตุของปรากฏการณ์ขี้ปลาวาฬ (Red Tide)",
+                wikiUrl: "https://th.wikipedia.org/wiki/ไดโนแฟลเจลเลต"
+            },
+            {
+                sciName: "Bacillus anthracis",
+                commonName: "แบคทีเรียแอนแทรกซ์ (Anthrax bacteria)",
+                kingdom: "Monera",
+                phylum: "Bacillota",
+                class: "Bacilli",
+                order: "Bacillales",
+                family: "Bacillaceae",
+                genus: "Bacillus",
+                species: "Bacillus anthracis",
+                subLevel: "Spore-forming pathogen",
+                description: "แบคทีเรียแท่งยาวสร้างสปอร์ได้ทนทานสูง เป็นเชื้อก่อโรคแอนแทรกซ์ในสัตว์และติดต่อสู่คนได้",
+                wikiUrl: "https://th.wikipedia.org/wiki/แอนแทรกซ์"
+            },
+            {
+                sciName: "Panthera pardus",
+                commonName: "เสือดาว / เสือดำ (Leopard)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Carnivora",
+                family: "Felidae",
+                genus: "Panthera",
+                species: "Panthera pardus",
+                subLevel: "Subspecies: P. p. delacouri",
+                description: "เสือขนาดกลางที่มีลายจุดดอกกุหลาบ (Rosettes) ปรับตัวเก่ง ปีนต้นไม้ได้ดีเยี่ยม",
+                wikiUrl: "https://th.wikipedia.org/wiki/เสือดาว"
+            },
+            {
+                sciName: "Aquila chrysaetos",
+                commonName: "นกอินทรีทอง (Golden Eagle)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Aves",
+                order: "Accipitriformes",
+                family: "Accipitridae",
+                genus: "Aquila",
+                species: "Aquila chrysaetos",
+                subLevel: "-",
+                description: "นกนักล่าขนาดใหญ่ทรงพลัง มีสายตาเฉียบคมและขนสีทองบริเวณหัวและคอ",
+                wikiUrl: "https://th.wikipedia.org/wiki/นกอินทรีทอง"
+            },
+            {
+                sciName: "Mangifera indica",
+                commonName: "มะม่วง (Mango)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Sapindales",
+                family: "Anacardiaceae",
+                genus: "Mangifera",
+                species: "Mangifera indica",
+                subLevel: "Cultivar: Nam Dok Mai",
+                description: "ไม้ยืนต้นผลไม้เศรษฐกิจเขตร้อน ผลสุกมีรสหวานหอม เป็นที่นิยมทั่วโลก",
+                wikiUrl: "https://th.wikipedia.org/wiki/มะม่วง"
+            },
+            {
+                sciName: "Nelumbo nucifera",
+                commonName: "บัวหลวง (Sacred Lotus)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Proteales",
+                family: "Nelumbonaceae",
+                genus: "Nelumbo",
+                species: "Nelumbo nucifera",
+                subLevel: "-",
+                description: "พืชน้ำล้มลุกมีเหง้าใต้ดิน ดอกสวยงามผุดเหนือน้ำ ใช้ในทางศาสนาและสมุนไพร",
+                wikiUrl: "https://th.wikipedia.org/wiki/บัวหลวง"
+            },
+            {
+                sciName: "Pleurotus ostreatus",
+                commonName: "เห็ดนางรม (Oyster Mushroom)",
+                kingdom: "Fungi",
+                phylum: "Basidiomycota",
+                class: "Agaricomycetes",
+                order: "Agaricales",
+                family: "Pleurotaceae",
+                genus: "Pleurotus",
+                species: "Pleurotus ostreatus",
+                subLevel: "Edible mushroom",
+                description: "เห็ดรับประทานได้ เจริญเติบโตเป็นกลุ่มซ้อนกันคล้ายหอยนางรม มีเนื้อนุ่มหวานอร่อย",
+                wikiUrl: "https://th.wikipedia.org/wiki/เห็ดนางรม"
+            },
+            {
+                sciName: "Ganoderma lucidum",
+                commonName: "เห็ดหลินจือ (Lingzhi / Reishi)",
+                kingdom: "Fungi",
+                phylum: "Basidiomycota",
+                class: "Agaricomycetes",
+                order: "Polyporales",
+                family: "Ganodermataceae",
+                genus: "Ganoderma",
+                species: "Ganoderma lucidum",
+                subLevel: "Medicinal fungus",
+                description: "เห็ดสมุนไพรจีนโบราณ หมวกดอกแข็งเงางาม มีสรรพคุณบำรุงร่างกายและต้านอนุมูลอิสระ",
+                wikiUrl: "https://th.wikipedia.org/wiki/เห็ดหลินจือ"
+            },
+            {
+                sciName: "Volvox aureus",
+                commonName: "วอลว็อกซ์ (Volvox colonial alga)",
+                kingdom: "Protista",
+                phylum: "Chlorophyta",
+                class: "Chlorophyceae",
+                order: "Chlamydomonadales",
+                family: "Volvocaceae",
+                genus: "Volvox",
+                species: "Volvox aureus",
+                subLevel: "Colonial green algae",
+                description: "สาหร่ายสีเขียวเซลล์เดียวที่มารวมตัวกันเป็นอาณานิคมทรงกลมกลวง หมุนวนว่ายน้ำได้",
+                wikiUrl: "https://en.wikipedia.org/wiki/Volvox"
+            },
+            {
+                sciName: "Giardia lamblia",
+                commonName: "จิาร์เดีย (Giardia intestinalis)",
+                kingdom: "Protista",
+                phylum: "Metamonada",
+                class: "Carpediemonas",
+                order: "Diplomonadida",
+                family: "Hexamitidae",
+                genus: "Giardia",
+                species: "Giardia lamblia",
+                subLevel: "Intestinal parasite",
+                description: "โปรโตซัวปรสิตในลำไส้ ก่อให้เกิดอาการท้องร่วงเรื้อรังติดต่อผ่านน้ำดื่มหรืออาหารปนเปื้อน",
+                wikiUrl: "https://th.wikipedia.org/wiki/จิาร์เดีย"
+            },
+            {
+                sciName: "Staphylococcus aureus",
+                commonName: "แบคทีเรียสตาฟิโลค็อกคัส (Golden Staph)",
+                kingdom: "Monera",
+                phylum: "Bacillota",
+                class: "Bacilli",
+                order: "Caryophanales",
+                family: "Staphylococcaceae",
+                genus: "Staphylococcus",
+                species: "Staphylococcus aureus",
+                subLevel: "MRSA / MSSA strains",
+                description: "แบคทีเรียทรงกลมเรียงตัวเป็นพวงคลององุ่น พบได้ทั่วไปบนผิวหนัง แต่อาจก่อโรคติดเชื้อรุนแรง",
+                wikiUrl: "https://th.wikipedia.org/wiki/สตาฟิโลค็อกคัส_ออเรียส"
+            },
+            {
+                sciName: "Rhizobium leguminosarum",
+                commonName: "ไรโซเบียม (Nitrogen-fixing bacteria)",
+                kingdom: "Monera",
+                phylum: "Pseudomonadota",
+                class: "Alphaproteobacteria",
+                order: "Rhizobiales",
+                family: "Rhizobiaceae",
+                genus: "Rhizobium",
+                species: "Rhizobium leguminosarum",
+                subLevel: "Symbiotic root nodule bacterium",
+                description: "แบคทีเรียที่อาศัยปมรากพืชตระกูลถั่ว ช่วยตรึงไนโตรเจนจากอากาศมาบำรุงดินให้พืชเจริญเติบโต",
+                wikiUrl: "https://th.wikipedia.org/wiki/ไรโซเบียม"
+            },
+            {
+                sciName: "Ailuropoda melanoleuca",
+                commonName: "แพนด้ายักษ์ (Giant Panda)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Carnivora",
+                family: "Ursidae",
+                genus: "Ailuropoda",
+                species: "Ailuropoda melanoleuca",
+                subLevel: "-",
+                description: "สัตว์เลี้ยงลูกด้วยนมในวงศ์หมี มีถิ่นอาศัยในประเทศจีน กินไผ่เป็นอาหารหลัก เป็นสัญลักษณ์ของการอนุรักษ์สัตว์ป่า",
+                wikiUrl: "https://th.wikipedia.org/wiki/แพนด้ายักษ์"
+            },
+            {
+                sciName: "Carcharodon carcharias",
+                commonName: "ฉลามขาว (Great White Shark)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Chondrichthyes (ปลากระดูกอ่อน)",
+                order: "Lamniformes",
+                family: "Lamnidae",
+                genus: "Carcharodon",
+                species: "Carcharodon carcharias",
+                subLevel: "-",
+                description: "ปลากระดูกอ่อนที่เป็นนักล่าขนาดใหญ่ที่สุดในมหาสมุทร มีฟันแหลมคมเป็นซี่เลื่อย",
+                wikiUrl: "https://th.wikipedia.org/wiki/ปลาฉลามขาว"
+            },
+            {
+                sciName: "Ornithorhynchus anatinus",
+                commonName: "ตุ่นปากเป็ด (Platypus)",
+                kingdom: "Animalia",
+                phylum: "Chordata",
+                class: "Mammalia",
+                order: "Monotremata",
+                family: "Ornithorhynchidae",
+                genus: "Ornithorhynchus",
+                species: "Ornithorhynchus anatinus",
+                subLevel: "-",
+                description: "สัตว์เลี้ยงลูกด้วยนมที่ออกลูกเป็นไข่ มีปากคล้ายเป็ด หางคล้ายบีเวอร์ และตัวผู้มีเดือยพิษที่เท้าหลัง",
+                wikiUrl: "https://th.wikipedia.org/wiki/ตุ่นปากเป็ด"
+            },
+            {
+                sciName: "Dionaea muscipula",
+                commonName: "กาบหอยแครง (Venus Flytrap)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Caryophyllales",
+                family: "Droseraceae",
+                genus: "Dionaea",
+                species: "Dionaea muscipula",
+                subLevel: "-",
+                description: "พืชกินแมลงที่มีโครงสร้างใบลักษณะคล้ายกับดัก สามารถขยับปิดงับแมลงที่มาเกาะเพื่อย่อยเป็นสารอาหารได้",
+                wikiUrl: "https://th.wikipedia.org/wiki/กาบหอยแครง"
+            },
+            {
+                sciName: "Rafflesia arnoldii",
+                commonName: "บัวผุด / ดอกซากศพ (Corpse Lily)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Malpighiales",
+                family: "Rafflesiaceae",
+                genus: "Rafflesia",
+                species: "Rafflesia arnoldii",
+                subLevel: "-",
+                description: "พืชกาฝากที่ไม่มีราก ลำต้น หรือใบ มีดอกเดี่ยวขนาดใหญ่ที่สุดในโลกและส่งกลิ่นเหม็นเน่าคล้ายซากศพเพื่อล่อแมลง",
+                wikiUrl: "https://th.wikipedia.org/wiki/บัวผุด"
+            },
+            {
+                sciName: "Nepenthes mirabilis",
+                commonName: "หม้อข้าวหม้อแกงลิง (Pitcher Plant)",
+                kingdom: "Plantae",
+                phylum: "Tracheophyta",
+                class: "Magnoliopsida",
+                order: "Caryophyllales",
+                family: "Nepenthaceae",
+                genus: "Nepenthes",
+                species: "Nepenthes mirabilis",
+                subLevel: "-",
+                description: "พืชกินแมลงที่มีการดัดแปลงใบเป็นรูปทรงกระเปาะ (หม้อ) ภายในมีน้ำย่อยสำหรับดักจับและย่อยสลายแมลง",
+                wikiUrl: "https://th.wikipedia.org/wiki/หม้อข้าวหม้อแกงลิง"
+            },
+            {
+                sciName: "Cordyceps militaris",
+                commonName: "ถั่งเช่าสีทอง (Cordyceps)",
+                kingdom: "Fungi",
+                phylum: "Ascomycota",
+                class: "Sordariomycetes",
+                order: "Hypocreales",
+                family: "Cordycipitaceae",
+                genus: "Cordyceps",
+                species: "Cordyceps militaris",
+                subLevel: "-",
+                description: "เห็ดรากลุ่มปรสิตที่ก่อโรคในแมลง นิยมนำมาเพาะเลี้ยงเพื่อใช้เป็นยาสมุนไพรแผนโบราณ",
+                wikiUrl: "https://th.wikipedia.org/wiki/ถั่งเช่า"
+            },
+            {
+                sciName: "Tuber melanosporum",
+                commonName: "ทรัฟเฟิลดำ (Black Truffle)",
+                kingdom: "Fungi",
+                phylum: "Ascomycota",
+                class: "Pezizomycetes",
+                order: "Pezizales",
+                family: "Tuberaceae",
+                genus: "Tuber",
+                species: "Tuber melanosporum",
+                subLevel: "-",
+                description: "เห็ดราที่เจริญเติบโตอยู่ใต้ดินและอยู่ร่วมกับรากต้นไม้บางชนิด มีกลิ่นหอมเฉพาะตัวและมีราคาแพงมากในวงการอาหาร",
+                wikiUrl: "https://en.wikipedia.org/wiki/Tuber_melanosporum"
+            },
+            {
+                sciName: "Amanita phalloides",
+                commonName: "เห็ดระโงกหิน (Death Cap)",
+                kingdom: "Fungi",
+                phylum: "Basidiomycota",
+                class: "Agaricomycetes",
+                order: "Agaricales",
+                family: "Amanitaceae",
+                genus: "Amanita",
+                species: "Amanita phalloides",
+                subLevel: "-",
+                description: "หนึ่งในเห็ดที่มีพิษร้ายแรงที่สุดในโลก ทำลายตับและไต หากรับประทานอาจทำให้เสียชีวิตได้",
+                wikiUrl: "https://en.wikipedia.org/wiki/Amanita_phalloides"
+            },
+            {
+                sciName: "Toxoplasma gondii",
+                commonName: "ท็อกโซพลาสมา (Toxoplasmosis Parasite)",
+                kingdom: "Protista",
+                phylum: "Apicomplexa",
+                class: "Conoidasida",
+                order: "Eucoccidiorida",
+                family: "Sarcocystidae",
+                genus: "Toxoplasma",
+                species: "Toxoplasma gondii",
+                subLevel: "-",
+                description: "โปรโตซัวปรสิตที่อาศัยในเซลล์ ก่อให้เกิดโรคท็อกโซพลาสโมซิส โดยมักมีสัตว์ตระกูลแมวเป็นโฮสต์หลัก",
+                wikiUrl: "https://th.wikipedia.org/wiki/Toxoplasma_gondii"
+            },
+            {
+                sciName: "Dictyostelium discoideum",
+                commonName: "ราเมือก (Cellular Slime Mold)",
+                kingdom: "Protista",
+                phylum: "Amoebozoa",
+                class: "Dictyosteliomycetes",
+                order: "Dictyosteliales",
+                family: "Dictyosteliaceae",
+                genus: "Dictyostelium",
+                species: "Dictyostelium discoideum",
+                subLevel: "-",
+                description: "สิ่งมีชีวิตที่ปกติอยู่แบบเซลล์เดียวเหมือนอะมีบา แต่เมื่อขาดอาหารจะรวมตัวกันเป็นโครงสร้างหลายเซลล์เคลื่อนที่ได้คล้ายทาก",
+                wikiUrl: "https://en.wikipedia.org/wiki/Dictyostelium_discoideum"
+            },
+            {
+                sciName: "Macrocystis pyrifera",
+                commonName: "สาหร่ายเคลป์ยักษ์ (Giant Kelp)",
+                kingdom: "Protista",
+                phylum: "Ochrophyta",
+                class: "Phaeophyceae (สาหร่ายสีน้ำตาล)",
+                order: "Laminariales",
+                family: "Laminariaceae",
+                genus: "Macrocystis",
+                species: "Macrocystis pyrifera",
+                subLevel: "-",
+                description: "สาหร่ายสีน้ำตาลขนาดใหญ่มาก เติบโตเป็นป่าสาหร่ายใต้น้ำ (Kelp forest) ซึ่งเป็นแหล่งอนุบาลสัตว์ทะเลที่สำคัญ",
+                wikiUrl: "https://en.wikipedia.org/wiki/Macrocystis_pyrifera"
+            },
+            {
+                sciName: "Mycobacterium tuberculosis",
+                commonName: "แบคทีเรียวัณโรค (TB Bacteria)",
+                kingdom: "Monera",
+                phylum: "Actinomycetota",
+                class: "Actinomycetes",
+                order: "Mycobacteriales",
+                family: "Mycobacteriaceae",
+                genus: "Mycobacterium",
+                species: "Mycobacterium tuberculosis",
+                subLevel: "-",
+                description: "แบคทีเรียที่มีผนังเซลล์หนาและทนทาน เป็นสาเหตุหลักของการเกิดโรควัณโรคปอดในมนุษย์",
+                wikiUrl: "https://th.wikipedia.org/wiki/วัณโรค"
+            },
+            {
+                sciName: "Helicobacter pylori",
+                commonName: "เอชไพโลไร (H. pylori)",
+                kingdom: "Monera",
+                phylum: "Campylobacterota",
+                class: "Campylobacteria",
+                order: "Campylobacterales",
+                family: "Helicobacteraceae",
+                genus: "Helicobacter",
+                species: "Helicobacter pylori",
+                subLevel: "-",
+                description: "แบคทีเรียรูปเกลียวที่สามารถอาศัยอยู่ในกรดของกระเพาะอาหารได้ เป็นสาเหตุหลักของแผลในกระเพาะและมะเร็งกระเพาะอาหาร",
+                wikiUrl: "https://th.wikipedia.org/wiki/เฮลิโคแบคเตอร์_ไพโลไร"
+            },
+            {
+                sciName: "Salmonella enterica",
+                commonName: "ซัลโมเนลลา (Salmonella)",
+                kingdom: "Monera",
+                phylum: "Pseudomonadota",
+                class: "Gammaproteobacteria",
+                order: "Enterobacteriales",
+                family: "Enterobacteriaceae",
+                genus: "Salmonella",
+                species: "Salmonella enterica",
+                subLevel: "-",
+                description: "แบคทีเรียแกรมลบที่มักปนเปื้อนในเนื้อสัตว์หรือไข่ดิบ ก่อให้เกิดอาการอาหารเป็นพิษและลำไส้อักเสบอย่างรุนแรง",
+                wikiUrl: "https://th.wikipedia.org/wiki/Salmonella"
+            }
+        ];
+
+        let currentFilterKingdom = "ALL";
+        let currentSearchQuery = "";
+        let currentSortBy = "name_asc";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderDashboard();
+            
+            document.getElementById('kingdomInput').addEventListener('change', (e) => {
+                const phylumLabel = document.getElementById('phylumLabel');
+                if (e.target.value === 'Plantae') {
+                    phylumLabel.innerText = "ดิวิชัน (Division สำหรับพืช)";
+                } else {
+                    phylumLabel.innerText = "ไฟลัม / ดิวิชัน (Phylum / Division)";
+                }
+            });
+        });
+
+        function renderDashboard() {
+            updateStats();
+            renderKingdomSidebar();
+            renderGrid();
+        }
+
+        function updateStats() {
+            const total = taxonomyData.length;
+            const animalia = taxonomyData.filter(i => i.kingdom === 'Animalia').length;
+            const plantae = taxonomyData.filter(i => i.kingdom === 'Plantae').length;
+            const fungi = taxonomyData.filter(i => i.kingdom === 'Fungi').length;
+            const others = total - animalia - plantae - fungi;
+
+            document.getElementById('headerTotalCount').innerText = `${total} รายการ`;
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statAnimalia').innerText = animalia;
+            document.getElementById('statPlantae').innerText = plantae;
+            document.getElementById('statFungi').innerText = fungi;
+            document.getElementById('statOthers').innerText = others;
+            document.getElementById('kingdomCountBadge').innerText = total;
+        }
+
+        function renderKingdomSidebar() {
+            const container = document.getElementById('kingdomListContainer');
+            const kingdoms = [
+                { id: 'ALL', name: 'ทุกอาณาจักรทั้งหมด', icon: 'fa-globe', count: taxonomyData.length },
+                { id: 'Animalia', name: 'อาณาจักรสัตว์ (Animalia)', icon: 'fa-paw', count: taxonomyData.filter(i => i.kingdom === 'Animalia').length },
+                { id: 'Plantae', name: 'อาณาจักรพืช (Plantae)', icon: 'fa-leaf', count: taxonomyData.filter(i => i.kingdom === 'Plantae').length },
+                { id: 'Fungi', name: 'อาณาจักรฟังใจ (Fungi)', icon: 'fa-mushroom', count: taxonomyData.filter(i => i.kingdom === 'Fungi').length },
+                { id: 'Protista', name: 'อาณาจักรโพรทีสตา (Protista)', icon: 'fa-water', count: taxonomyData.filter(i => i.kingdom === 'Protista').length },
+                { id: 'Monera', name: 'อาณาจักรมอเนอรา (Monera)', icon: 'fa-bacteria', count: taxonomyData.filter(i => i.kingdom === 'Monera').length }
+            ];
+
+            container.innerHTML = kingdoms.map(k => `
+                <button onclick="filterByKingdom('${k.id}')" class="w-full flex items-center justify-between p-3 rounded-2xl text-xs transition ${currentFilterKingdom === k.id ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80 shadow-2xs' : 'text-slate-600 hover:bg-slate-50 font-medium'}">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid ${k.icon} w-4 text-center ${currentFilterKingdom === k.id ? 'text-emerald-600' : 'text-slate-400'}"></i>
+                        <span class="truncate">${k.name}</span>
+                    </div>
+                    <span class="text-[11px] px-2.5 py-0.5 rounded-full ${currentFilterKingdom === k.id ? 'bg-emerald-200/80 text-emerald-900 font-bold' : 'bg-slate-100 text-slate-500'}">${k.count}</span>
+                </button>
+            `).join('');
+        }
+
+        function filterByKingdom(kingdom) {
+            currentFilterKingdom = kingdom;
+            document.getElementById('kingdomFilterSelect').value = kingdom;
+            renderKingdomSidebar();
+            renderGrid();
+        }
+
+        function handleSearch() {
+            currentSearchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            renderGrid();
+        }
+
+        function handleSort() {
+            currentSortBy = document.getElementById('sortBy').value;
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('taxonomyGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            let filtered = taxonomyData.filter(item => {
+                const matchKingdom = currentFilterKingdom === 'ALL' || item.kingdom === currentFilterKingdom;
+                const matchSearch = !currentSearchQuery || 
+                    item.sciName.toLowerCase().includes(currentSearchQuery) ||
+                    (item.commonName && item.commonName.toLowerCase().includes(currentSearchQuery)) ||
+                    item.kingdom.toLowerCase().includes(currentSearchQuery) ||
+                    (item.family && item.family.toLowerCase().includes(currentSearchQuery)) ||
+                    (item.species && item.species.toLowerCase().includes(currentSearchQuery));
+                return matchKingdom && matchSearch;
+            });
+
+            filtered.sort((a, b) => {
+                if (currentSortBy === 'name_asc') return a.sciName.localeCompare(b.sciName);
+                if (currentSortBy === 'name_desc') return b.sciName.localeCompare(a.sciName);
+                if (currentSortBy === 'kingdom') return a.kingdom.localeCompare(b.kingdom);
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            const kingdomBadgeStyles = {
+                'Animalia': 'bg-blue-50 text-blue-700 border-blue-200/80',
+                'Plantae': 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+                'Fungi': 'bg-amber-50 text-amber-700 border-amber-200/80',
+                'Protista': 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
+                'Monera': 'bg-purple-50 text-purple-700 border-purple-200/80'
+            };
+
+            const kingdomNameThMap = {
+                'Animalia': '🐾 อาณาจักรสัตว์',
+                'Plantae': '🌿 อาณาจักรพืช',
+                'Fungi': '🍄 อาณาจักรฟังใจ',
+                'Protista': '💧 อาณาจักรโพรทีสตา',
+                'Monera': '🦠 อาณาจักรมอเนอรา'
+            };
+
+            grid.innerHTML = filtered.map(item => {
+                const originalIndex = taxonomyData.indexOf(item);
+                const badgeStyle = kingdomBadgeStyles[item.kingdom] || 'bg-slate-50 text-slate-700 border-slate-200';
+                const kingdomLabel = kingdomNameThMap[item.kingdom] || item.kingdom;
+                // Use kingdom representative cover image as requested
+                const coverImg = kingdomImages[item.kingdom] || kingdomImages["Animalia"];
+                
+                return `
+                    <div class="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                        <div>
+                            <!-- Card Image Banner with badge overlay -->
+                            <div class="relative h-44 w-full bg-slate-100 overflow-hidden">
+                                <img src="${item.imageUrl || coverImg}" alt="${item.kingdom}" onerror="this.src='${coverImg}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+                                <div class="absolute top-3 left-3">
+                                    <span class="text-[11px] font-bold px-3 py-1 rounded-full border shadow-sm ${badgeStyle} bg-white/95 backdrop-blur-xs">
+                                        ${kingdomLabel}
+                                    </span>
+                                </div>
+                                <div class="absolute top-3 right-3 flex items-center space-x-1 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-xl opacity-0 group-hover:opacity-100 transition duration-200">
+                                    <button onclick="openEditModal(${originalIndex})" class="p-1.5 text-white hover:text-emerald-300 transition" title="แก้ไข">
+                                        <i class="fa-solid fa-pen text-xs"></i>
+                                    </button>
+                                    <button onclick="deleteItem(${originalIndex})" class="p-1.5 text-white hover:text-rose-300 transition" title="ลบ">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+                                <!-- Very Large Centered Scientific Name inside Image Banner -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+                                    <h3 class="font-black text-xl sm:text-2xl italic tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">${item.sciName}</h3>
+                                    <p class="text-xs font-semibold text-emerald-200 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] mt-1">${item.commonName || ''}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-light">${item.description || 'ไม่มีคำอธิบายเพิ่มเติม'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="px-4 pb-4 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                            ${item.wikiUrl ? `
+                            <a href="${item.wikiUrl}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1.5 bg-blue-50/80 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition">
+                                <i class="fa-solid fa-external-link-alt text-[10px]"></i>
+                                <span>ดูข้อมูล/รูปเพิ่ม</span>
+                            </a>` : '<span></span>'}
+                            <button onclick="openDetailModal(${originalIndex})" class="text-emerald-700 hover:text-emerald-800 font-bold flex items-center space-x-1.5 transition bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl">
+                                <span>แผนผัง Taxon</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDetailModal(index) {
+            const item = taxonomyData[index];
+            const kingdomNameThMap = {
+                'Animalia': 'อาณาจักรสัตว์ (Animalia)',
+                'Plantae': 'อาณาจักรพืช (Plantae)',
+                'Fungi': 'อาณาจักรฟังใจ (Fungi)',
+                'Protista': 'อาณาจักรโพรทีสตา (Protista)',
+                'Monera': 'อาณาจักรมอเนอรา (Monera)'
+            };
+            const coverImg = kingdomImages[item.kingdom] || kingdomImages["Animalia"];
+
+            document.getElementById('modalTitle').innerText = `รายละเอียดอนุกรมวิธาน: ${item.sciName}`;
+            
+            const content = document.getElementById('modalContentBody');
+            content.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-gradient-to-br from-emerald-50/60 to-teal-50/40 p-4 rounded-2xl border border-emerald-100">
+                    <div class="h-32 sm:h-full w-full rounded-xl overflow-hidden bg-slate-200 border border-emerald-200 relative">
+                        <img src="${item.imageUrl || coverImg}" alt="${item.sciName}" onerror="this.src='${coverImg}'" class="w-full h-full object-cover">
+                    </div>
+                    <div class="sm:col-span-2 space-y-1.5 text-center sm:text-left">
+                        <!-- Very Large Centered/Highlighted Scientific Name in Modal -->
+                        <h4 class="text-2xl sm:text-3xl font-black text-slate-900 italic tracking-wide">${item.sciName}</h4>
+                        <p class="text-sm text-emerald-700 font-bold">${item.commonName || ''}</p>
+                        <p class="text-xs text-slate-600 leading-relaxed font-light">${item.description || 'ไม่มีข้อมูลคำอธิบาย'}</p>
+                        ${item.wikiUrl ? `
+                        <div class="pt-2">
+                            <a href="${item.wikiUrl}" target="_blank" class="inline-flex items-center space-x-1.5 text-xs text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-3 py-1.5 rounded-xl shadow-xs transition">
+                                <i class="fa-solid fa-globe text-xs"></i>
+                                <span>เปิดเว็บไซต์ข้อมูลเพิ่มเติม / รูปภาพจริง</span>
+                            </a>
+                        </div>` : ''}
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">ลำดับขั้นอนุกรมวิธานสิ่งมีชีวิต (Taxonomic Hierarchy - Taxon)</h4>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-globe w-5 text-emerald-600 text-sm"></i> <span>อาณาจักร (Kingdom)</span></span>
+                            <span class="font-bold text-slate-800">${kingdomNameThMap[item.kingdom] || item.kingdom}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-code-branch w-5 text-emerald-600 text-sm"></i> <span>ไฟลัม / ดิวิชัน (Phylum / Division)</span></span>
+                            <span class="font-bold text-slate-800">${item.phylum || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-layer-group w-5 text-emerald-600 text-sm"></i> <span>ชั้น (Class)</span></span>
+                            <span class="font-bold text-slate-800">${item.class || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-list-ul w-5 text-emerald-600 text-sm"></i> <span>อันดับ (Order)</span></span>
+                            <span class="font-bold text-slate-800">${item.order || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-users w-5 text-emerald-600 text-sm"></i> <span>วงศ์ (Family)</span></span>
+                            <span class="font-bold text-slate-800">${item.family || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-fingerprint w-5 text-emerald-600 text-sm"></i> <span>สกุล (Genus)</span></span>
+                            <span class="font-bold text-slate-800">${item.genus || '-'}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
+                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-dna w-5 text-emerald-600 text-sm"></i> <span>สปีชีส์ (Species)</span></span>
+                            <span class="font-bold text-slate-800 italic">${item.species || '-'}</span>
+                        </div>
+                        ${item.subLevel && item.subLevel !== '-' ? `
+                        <div class="flex items-center justify-between p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs">
+                            <span class="text-emerald-800 font-semibold flex items-center space-x-2"><i class="fa-solid fa-tag w-5 text-emerald-600 text-sm"></i> <span>ขั้นย่อยพิเศษ (Super / Sub Taxon)</span></span>
+                            <span class="font-bold text-emerald-900">${item.subLevel}</span>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function openAddModal() {
+            document.getElementById('formModalTitle').innerText = "เพิ่มข้อมูลอนุกรมวิธาน";
+            document.getElementById('editIndex').value = -1;
+            document.getElementById('taxonomyForm').reset();
+            document.getElementById('formModal').classList.remove('hidden');
+        }
+
+        function openEditModal(index) {
+            const item = taxonomyData[index];
+            document.getElementById('formModalTitle').innerText = "แก้ไขข้อมูลอนุกรมวิธาน";
+            document.getElementById('editIndex').value = index;
+
+            document.getElementById('sciNameInput').value = item.sciName;
+            document.getElementById('commonNameInput').value = item.commonName || '';
+            document.getElementById('kingdomInput').value = item.kingdom;
+            document.getElementById('phylumInput').value = item.phylum || '';
+            document.getElementById('classInput').value = item.class || '';
+            document.getElementById('orderInput').value = item.order || '';
+            document.getElementById('familyInput').value = item.family || '';
+            document.getElementById('genusInput').value = item.genus || '';
+            document.getElementById('speciesInput').value = item.species || '';
+            document.getElementById('subLevelInput').value = item.subLevel || '';
+            document.getElementById('imageUrlInput').value = item.imageUrl || '';
+            document.getElementById('wikiUrlInput').value = item.wikiUrl || '';
+            document.getElementById('descInput').value = item.description || '';
+
+            document.getElementById('formModal').classList.remove('hidden');
+        }
+
+        function closeFormModal() {
+            document.getElementById('formModal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const index = parseInt(document.getElementById('editIndex').value);
+
+            const newItem = {
+                sciName: document.getElementById('sciNameInput').value.trim(),
+                commonName: document.getElementById('commonNameInput').value.trim(),
+                kingdom: document.getElementById('kingdomInput').value,
+                phylum: document.getElementById('phylumInput').value.trim(),
+                class: document.getElementById('classInput').value.trim(),
+                order: document.getElementById('orderInput').value.trim(),
+                family: document.getElementById('familyInput').value.trim(),
+                genus: document.getElementById('genusInput').value.trim(),
+                species: document.getElementById('speciesInput').value.trim(),
+                subLevel: document.getElementById('subLevelInput').value.trim(),
+                imageUrl: document.getElementById('imageUrlInput').value.trim(),
+                wikiUrl: document.getElementById('wikiUrlInput').value.trim(),
+                description: document.getElementById('descInput').value.trim()
+            };
+
+            if (index === -1) {
+                taxonomyData.unshift(newItem);
+                showToast("เพิ่มข้อมูลอนุกรมวิธานสำเร็จ");
+            } else {
+                taxonomyData[index] = newItem;
+                showToast("อัปเดตข้อมูลอนุกรมวิธานสำเร็จ");
+            }
+
+            closeFormModal();
+            renderDashboard();
+        }
+
+        function deleteItem(index) {
+            if (confirm(`คุณต้องการลบข้อมูล "${taxonomyData[index].sciName}" หรือไม่?`)) {
+                taxonomyData.splice(index, 1);
+                showToast("ลบข้อมูลสำเร็จ", "fa-trash text-rose-400");
+                renderDashboard();
+            }
+        }
+
+        function showToast(message, iconClass = "fa-solid fa-check text-emerald-400 text-base") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = message;
+            toastIcon.className = iconClass;
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
