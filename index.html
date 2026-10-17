@@ -10,9 +10,9 @@
     <style>
         body { font-family: 'Prompt', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
@@ -20,32 +20,34 @@
         .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/30 text-slate-800 h-full flex flex-col overflow-hidden">
+<body class="bg-slate-900 text-slate-200 h-full flex flex-col overflow-hidden relative">
 
-    <header class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 text-white shadow-lg flex-none z-20 border-b border-emerald-600/30">
+    <!-- Interactive Background Canvas -->
+    <canvas id="particleCanvas" class="fixed inset-0 z-0 pointer-events-none"></canvas>
+
+    <header class="bg-slate-900/80 backdrop-blur-md text-white shadow-lg flex-none z-20 border-b border-emerald-500/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3.5">
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide">
-                        <span>อนุกรมวิธาน (Taxonomy)</span>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center space-x-2">
+                        <i class="fa-solid fa-leaf text-emerald-400"></i>
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-300">อนุกรมวิธาน (Taxonomy)</span>
                     </h1>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
                 <!-- Developer Profile Badge -->
-                <div class="hidden md:flex items-center space-x-2.5 bg-emerald-900/60 px-3 py-1.5 rounded-full border border-emerald-600/50 shadow-inner">
-                    <img src="https://raw.githubusercontent.com/metawat888/Picture/69f9d3a46e017adc43abb8db3503ea8106ecae61/97488303_2887790847941184_353651305119481856_n.jpg" alt="Metawat Phongsaphang" class="w-8 h-8 rounded-full object-cover border-2 border-emerald-400/60 shadow-sm">
+                <div class="hidden md:flex items-center space-x-2.5 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 shadow-inner">
+                    <img src="https://raw.githubusercontent.com/metawat888/Picture/69f9d3a46e017adc43abb8db3503ea8106ecae61/97488303_2887790847941184_353651305119481856_n.jpg" alt="Metawat Phongsaphang" class="w-8 h-8 rounded-full object-cover border-2 border-emerald-500/60 shadow-sm">
                     <div class="text-left pr-1">
-                        <p class="text-[11px] font-bold text-white leading-tight">Metawat Phongsaphang</p>
-                        <p class="text-[9px] text-emerald-300 font-light">ผู้พัฒนาระบบ</p>
+                        <p class="text-[11px] font-bold text-slate-100 leading-tight">Metawat Phongsaphang</p>
+                        <p class="text-[9px] text-emerald-400 font-light">ผู้พัฒนาระบบ</p>
                     </div>
                 </div>
-
-                <button onclick="openAddModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-md hover:shadow-emerald-500/20 flex items-center space-x-2 border border-emerald-400/30">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    <span>เพิ่มอนุกรมวิธาน</span>
-                </button>
-                <div class="hidden md:flex items-center space-x-2 bg-emerald-900/50 px-3.5 py-2 rounded-xl border border-emerald-600/40 text-xs text-emerald-100 shadow-inner">
+                
+                <!-- Removed Add Button -->
+                
+                <div class="flex items-center space-x-2 bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700 text-xs text-emerald-200 shadow-inner">
                     <i class="fa-solid fa-database text-emerald-400"></i>
                     <span id="headerTotalCount" class="font-semibold">0 รายการ</span>
                 </div>
@@ -53,26 +55,26 @@
         </div>
     </header>
 
-    <main class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
+    <main class="flex-1 flex overflow-hidden max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6 z-10 relative">
         
         <!-- Sidebar / Navigation Tree Panel -->
-        <div class="w-full lg:w-80 bg-white/90 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden hidden lg:flex flex-none">
-            <div class="p-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
-                <h2 class="font-bold text-slate-700 flex items-center space-x-2.5 text-sm">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+        <div class="w-full lg:w-80 bg-slate-800/60 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-700/50 flex flex-col overflow-hidden hidden lg:flex flex-none">
+            <div class="p-4 border-b border-slate-700/50 bg-slate-800/80 flex items-center justify-between">
+                <h2 class="font-bold text-slate-200 flex items-center space-x-2.5 text-sm">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
                         <i class="fa-solid fa-sitemap"></i>
                     </div>
                     <span>5 อาณาจักรสิ่งมีชีวิต</span>
                 </h2>
-                <span id="kingdomCountBadge" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full shadow-2xs">0</span>
+                <span id="kingdomCountBadge" class="text-xs bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">0</span>
             </div>
             
-            <div class="p-3 border-b border-slate-100 bg-white">
+            <div class="p-3 border-b border-slate-700/50 bg-slate-800/40">
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                         <i class="fa-solid fa-filter text-xs"></i>
                     </span>
-                    <select id="kingdomFilterSelect" onchange="filterByKingdom(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    <select id="kingdomFilterSelect" onchange="filterByKingdom(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition appearance-none">
                         <option value="ALL">🌟 ทุกอาณาจักร (All Kingdoms)</option>
                         <option value="Animalia">🐾 อาณาจักรสัตว์ (Animalia)</option>
                         <option value="Plantae">🌿 อาณาจักรพืช (Plantae)</option>
@@ -87,55 +89,55 @@
                 <!-- Populated by JS -->
             </div>
 
-            <div class="p-4 m-3 bg-gradient-to-br from-slate-900 to-emerald-950 text-white rounded-2xl text-xs space-y-2 shadow-sm">
-                <div class="font-bold text-emerald-300 flex items-center space-x-2">
+            <div class="p-4 m-3 bg-gradient-to-br from-slate-900 to-emerald-900 text-white rounded-2xl text-xs space-y-2 shadow-lg border border-emerald-500/20">
+                <div class="font-bold text-emerald-400 flex items-center space-x-2">
                     <i class="fa-solid fa-graduation-cap"></i>
                     <span>ลำดับขั้นอนุกรมวิธาน (Taxon)</span>
                 </div>
                 <p class="text-slate-300 leading-relaxed text-[11px]">
-                    Kingdom ➔ Phylum/Division ➔ Class ➔ Order ➔ Family ➔ Genus ➔ Species <span class="text-emerald-400 font-semibold">(พร้อม Super/Sub ย่อยตามความเหมาะสม)</span>
+                    Kingdom ➔ Phylum/Division ➔ Class ➔ Order ➔ Family ➔ Genus ➔ Species <span class="text-emerald-300 font-semibold">(พร้อม Super/Sub ย่อย)</span>
                 </p>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col bg-white/90 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <div class="flex-1 flex flex-col bg-slate-800/60 backdrop-blur-xl rounded-3xl shadow-xl border border-slate-700/50 overflow-hidden">
             
             <!-- Compact Statistics Banner Cards -->
-            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center space-x-2 text-xs font-bold text-slate-700">
-                    <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+            <div class="px-4 py-3 border-b border-slate-700/50 bg-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 text-xs font-bold text-slate-300">
+                    <i class="fa-solid fa-chart-pie text-emerald-400"></i>
                     <span>สรุปจำนวน:</span>
                 </div>
                 <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-white border border-slate-200 text-[11px] font-medium text-slate-700">
-                        <span>ทั้งหมด: <strong id="statTotal" class="text-slate-900 ml-0.5">0</strong></span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-[11px] font-medium text-slate-300">
+                        <span>ทั้งหมด: <strong id="statTotal" class="text-white ml-0.5">0</strong></span>
                     </span>
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-[11px] font-medium text-blue-800">
-                        <span>สัตว์: <strong id="statAnimalia" class="ml-0.5">0</strong></span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-blue-900/30 border border-blue-700/50 text-[11px] font-medium text-blue-300">
+                        <span>สัตว์: <strong id="statAnimalia" class="ml-0.5 text-blue-200">0</strong></span>
                     </span>
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-medium text-emerald-800">
-                        <span>พืช: <strong id="statPlantae" class="ml-0.5">0</strong></span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-emerald-900/30 border border-emerald-700/50 text-[11px] font-medium text-emerald-300">
+                        <span>พืช: <strong id="statPlantae" class="ml-0.5 text-emerald-200">0</strong></span>
                     </span>
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-800">
-                        <span>ฟังใจ: <strong id="statFungi" class="ml-0.5">0</strong></span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-amber-900/30 border border-amber-700/50 text-[11px] font-medium text-amber-300">
+                        <span>ฟังใจ: <strong id="statFungi" class="ml-0.5 text-amber-200">0</strong></span>
                     </span>
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-purple-50 border border-purple-200 text-[11px] font-medium text-purple-800">
-                        <span>อื่นๆ: <strong id="statOthers" class="ml-0.5">0</strong></span>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-lg bg-purple-900/30 border border-purple-700/50 text-[11px] font-medium text-purple-300">
+                        <span>อื่นๆ: <strong id="statOthers" class="ml-0.5 text-purple-200">0</strong></span>
                     </span>
                 </div>
             </div>
 
             <!-- Toolbar (Search & Filter Actions) -->
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white">
-                <div class="relative w-full sm:w-80">
+            <div class="p-4 border-b border-slate-700/50 flex flex-col sm:flex-row gap-3 items-center justify-between bg-slate-800/40">
+                <div class="relative w-full sm:w-96">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                         <i class="fa-solid fa-search text-xs"></i>
                     </span>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาวิทยาศาสตร์, ชื่อไทย, วงศ์, สปีชีส์..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาชื่อ, ไทย, อังกฤษ, วงศ์, สปีชีส์ หรืออาณาจักร..." class="w-full bg-slate-900/80 border border-slate-700 text-slate-200 text-xs rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
                 </div>
                 <div class="flex items-center space-x-2.5 w-full sm:w-auto justify-end">
-                    <span class="text-xs text-slate-500 font-medium">จัดเรียง:</span>
-                    <select id="sortBy" onchange="handleSort()" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition font-medium">
+                    <span class="text-xs text-slate-400 font-medium">จัดเรียง:</span>
+                    <select id="sortBy" onchange="handleSort()" class="bg-slate-900/80 border border-slate-700 text-slate-200 text-xs rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition font-medium appearance-none">
                         <option value="name_asc">ชื่อวิทยาศาสตร์ (A-Z)</option>
                         <option value="name_desc">ชื่อวิทยาศาสตร์ (Z-A)</option>
                         <option value="kingdom">ตามอาณาจักร (Kingdom)</option>
@@ -143,17 +145,17 @@
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 bg-gradient-to-b from-slate-50/40 to-white">
-                <div id="taxonomyGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-5 bg-gradient-to-b from-slate-900/40 to-slate-900/80">
+                <div id="taxonomyGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     <!-- Populated by JavaScript -->
                 </div>
                 <!-- Empty State -->
                 <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
-                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl mb-3 shadow-inner">
+                    <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-slate-500 text-2xl mb-3 shadow-inner border border-slate-700">
                         <i class="fa-solid fa-folder-open"></i>
                     </div>
-                    <h3 class="text-base font-bold text-slate-700">ไม่พบข้อมูลอนุกรมวิธาน</h3>
-                    <p class="text-xs text-slate-400 mt-1">ลองเปลี่ยนคำค้นหาหรือเพิ่มข้อมูลใหม่ในระบบ</p>
+                    <h3 class="text-base font-bold text-slate-300">ไม่พบข้อมูลอนุกรมวิธาน</h3>
+                    <p class="text-xs text-slate-500 mt-1">ลองเปลี่ยนคำค้นหาเป็นภาษาไทยหรือภาษาอังกฤษ</p>
                 </div>
             </div>
 
@@ -161,143 +163,48 @@
 
     </main>
 
-    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-slate-100">
-            <div class="bg-gradient-to-r from-emerald-700 to-teal-700 text-white p-5 px-6 flex items-center justify-between">
+    <!-- Modal Details (Read Only) -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+        <div class="bg-slate-900 rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-slate-700/80">
+            <div class="bg-gradient-to-r from-slate-800 to-emerald-900/50 border-b border-slate-700 p-5 px-6 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-emerald-200">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
                         <i class="fa-solid fa-circle-info"></i>
                     </div>
-                    <h3 class="font-bold text-base" id="modalTitle">รายละเอียดอนุกรมวิธาน</h3>
+                    <h3 class="font-bold text-base text-slate-100" id="modalTitle">รายละเอียดอนุกรมวิธาน</h3>
                 </div>
-                <button onclick="closeDetailModal()" class="text-emerald-200 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition">
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-700 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar space-y-6" id="modalContentBody">
                 <!-- Content populated dynamically -->
             </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-                <button onclick="closeDetailModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow-2xs">ปิดหน้าต่าง</button>
+            <div class="p-4 bg-slate-800/80 border-t border-slate-700 flex justify-end">
+                <button onclick="closeDetailModal()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-5 py-2.5 rounded-xl text-xs font-semibold transition border border-slate-600">ปิดหน้าต่าง</button>
             </div>
         </div>
-    </div>
-
-    <div id="formModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] border border-slate-100">
-            <div class="bg-gradient-to-r from-emerald-700 to-teal-700 text-white p-5 px-6 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-emerald-200">
-                        <i class="fa-solid fa-plus-circle"></i>
-                    </div>
-                    <h3 class="font-bold text-base" id="formModalTitle">เพิ่มข้อมูลอนุกรมวิธาน</h3>
-                </div>
-                <button onclick="closeFormModal()" class="text-emerald-200 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <form id="taxonomyForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto custom-scrollbar space-y-4">
-                <input type="hidden" id="editIndex" value="-1">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชื่อวิทยาศาสตร์ (Scientific Name)*</label>
-                        <input type="text" id="sciNameInput" required placeholder="เช่น Panthera tigris" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชื่อสามัญ / ชื่อไทย (Common Name)</label>
-                        <input type="text" id="commonNameInput" placeholder="เช่น เสือโคร่ง" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">อาณาจักร (Kingdom)*</label>
-                        <select id="kingdomInput" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition font-medium">
-                            <option value="Animalia">🐾 อาณาจักรสัตว์ (Animalia)</option>
-                            <option value="Plantae">🌿 อาณาจักรพืช (Plantae)</option>
-                            <option value="Fungi">🍄 อาณาจักรฟังใจ (Fungi)</option>
-                            <option value="Protista">💧 อาณาจักรโพรทีสตา (Protista)</option>
-                            <option value="Monera">🦠 อาณาจักรมอเนอรา (Monera)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5" id="phylumLabel">ไฟลัม / ดิวิชัน (Phylum / Division)</label>
-                        <input type="text" id="phylumInput" placeholder="เช่น Chordata หรือ Tracheophyta" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ชั้น (Class)</label>
-                        <input type="text" id="classInput" placeholder="เช่น Mammalia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">อันดับ (Order)</label>
-                        <input type="text" id="orderInput" placeholder="เช่น Carnivora" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">วงศ์ (Family)</label>
-                        <input type="text" id="familyInput" placeholder="เช่น Felidae" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">สกุล (Genus)</label>
-                        <input type="text" id="genusInput" placeholder="เช่น Panthera" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">สปีชีส์ (Species)</label>
-                        <input type="text" id="speciesInput" placeholder="เช่น Panthera tigris" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ขั้นย่อยพิเศษ (Super/Sub Taxon)</label>
-                        <input type="text" id="subLevelInput" placeholder="เช่น Subspecies: P. t. corbetti" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ลิงก์รูปภาพสิ่งมีชีวิต (Image URL)</label>
-                        <input type="url" id="imageUrlInput" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1.5">ลิงก์ข้อมูลวิกิพีเดีย / อ้างอิง</label>
-                        <input type="url" id="wikiUrlInput" placeholder="https://th.wikipedia.org/wiki/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1.5">ลักษณะเด่นและคำอธิบาย (Description)</label>
-                    <textarea id="descInput" rows="3" placeholder="ระบุลักษณะทางชีวภาพ ข้อมูลเชิงอนุกรมวิธาน..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-3 pt-3">
-                    <button type="button" onclick="closeFormModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-xl text-xs font-semibold transition">ยกเลิก</button>
-                    <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-6 py-2.5 rounded-xl text-xs font-semibold transition shadow-md">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl transform translate-y-24 opacity-0 transition-all duration-300 z-50 flex items-center space-x-3 text-xs border border-slate-800">
-        <i id="toastIcon" class="fa-solid fa-check text-emerald-400 text-base"></i>
-        <span id="toastMessage" class="font-medium">บันทึกข้อมูลสำเร็จ</span>
     </div>
 
     <script>
-        // Representative Kingdom cover images matching the 5 biological kingdoms with updated Plantae image
+        // Representative Kingdom cover images
         const kingdomImages = {
-            "Animalia": "https://github.com/metawat888/Picture/raw/b8460fb84f6fd5373755857dad23ff2de60b8ee1/9803a62c-2618-43fc-bfd2-bc8954f0ca03.webp", // Animal kingdom representative updated
-            "Plantae": "https://github.com/metawat888/Picture/blob/6d154055f9cd710a0eeda08852985565b05bf891/พืช.png?raw=true",  // Plant kingdom representative updated
-            "Fungi": "https://github.com/metawat888/Picture/raw/ea1b331a17ac2392b2b6427ed970106e43d05656/122627531.jpeg",    // Fungi kingdom representative updated to GitHub asset URL
-            "Protista": "https://github.com/metawat888/Picture/raw/f1101ff4bcc1f22ac12d6e6f0675bef62be86962/f12f8cbc-527c-4b49-90a3-68065745d159.jpeg", // Protista kingdom representative updated to GitHub asset URL
-            "Monera": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&w=600&q=80"    // Monera kingdom representative (Bacteria microorganisms)
+            "Animalia": "https://github.com/metawat888/Picture/raw/b8460fb84f6fd5373755857dad23ff2de60b8ee1/9803a62c-2618-43fc-bfd2-bc8954f0ca03.webp",
+            "Plantae": "https://github.com/metawat888/Picture/blob/6d154055f9cd710a0eeda08852985565b05bf891/พืช.png?raw=true",
+            "Fungi": "https://github.com/metawat888/Picture/raw/ea1b331a17ac2392b2b6427ed970106e43d05656/122627531.jpeg",
+            "Protista": "https://github.com/metawat888/Picture/raw/f1101ff4bcc1f22ac12d6e6f0675bef62be86962/f12f8cbc-527c-4b49-90a3-68065745d159.jpeg",
+            "Monera": "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&w=600&q=80"
         };
 
+        const kingdomNameThMap = {
+            'Animalia': 'อาณาจักรสัตว์ (Animalia)',
+            'Plantae': 'อาณาจักรพืช (Plantae)',
+            'Fungi': 'อาณาจักรฟังใจ (Fungi)',
+            'Protista': 'อาณาจักรโพรทีสตา (Protista)',
+            'Monera': 'อาณาจักรมอเนอรา (Monera)'
+        };
+
+        // All updated Flickr image URLs are included here
         let taxonomyData = [
             {
                 sciName: "Panthera tigris",
@@ -1057,15 +964,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             renderDashboard();
-            
-            document.getElementById('kingdomInput').addEventListener('change', (e) => {
-                const phylumLabel = document.getElementById('phylumLabel');
-                if (e.target.value === 'Plantae') {
-                    phylumLabel.innerText = "ดิวิชัน (Division สำหรับพืช)";
-                } else {
-                    phylumLabel.innerText = "ไฟลัม / ดิวิชัน (Phylum / Division)";
-                }
-            });
+            initCanvasBackground();
         });
 
         function renderDashboard() {
@@ -1102,12 +1001,12 @@
             ];
 
             container.innerHTML = kingdoms.map(k => `
-                <button onclick="filterByKingdom('${k.id}')" class="w-full flex items-center justify-between p-3 rounded-2xl text-xs transition ${currentFilterKingdom === k.id ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80 shadow-2xs' : 'text-slate-600 hover:bg-slate-50 font-medium'}">
+                <button onclick="filterByKingdom('${k.id}')" class="w-full flex items-center justify-between p-3 rounded-2xl text-xs transition ${currentFilterKingdom === k.id ? 'bg-emerald-900/40 text-emerald-300 font-bold border border-emerald-500/50 shadow-inner' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 font-medium'}">
                     <div class="flex items-center space-x-3 truncate">
-                        <i class="fa-solid ${k.icon} w-4 text-center ${currentFilterKingdom === k.id ? 'text-emerald-600' : 'text-slate-400'}"></i>
+                        <i class="fa-solid ${k.icon} w-4 text-center ${currentFilterKingdom === k.id ? 'text-emerald-400' : 'text-slate-500'}"></i>
                         <span class="truncate">${k.name}</span>
                     </div>
-                    <span class="text-[11px] px-2.5 py-0.5 rounded-full ${currentFilterKingdom === k.id ? 'bg-emerald-200/80 text-emerald-900 font-bold' : 'bg-slate-100 text-slate-500'}">${k.count}</span>
+                    <span class="text-[11px] px-2.5 py-0.5 rounded-full ${currentFilterKingdom === k.id ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'bg-slate-800 text-slate-500'}">${k.count}</span>
                 </button>
             `).join('');
         }
@@ -1135,12 +1034,17 @@
 
             let filtered = taxonomyData.filter(item => {
                 const matchKingdom = currentFilterKingdom === 'ALL' || item.kingdom === currentFilterKingdom;
+                
+                const kingdomNameTh = kingdomNameThMap[item.kingdom] ? kingdomNameThMap[item.kingdom].toLowerCase() : '';
+                
                 const matchSearch = !currentSearchQuery || 
                     item.sciName.toLowerCase().includes(currentSearchQuery) ||
                     (item.commonName && item.commonName.toLowerCase().includes(currentSearchQuery)) ||
                     item.kingdom.toLowerCase().includes(currentSearchQuery) ||
+                    kingdomNameTh.includes(currentSearchQuery) || // Supports Thai keyword matching
                     (item.family && item.family.toLowerCase().includes(currentSearchQuery)) ||
                     (item.species && item.species.toLowerCase().includes(currentSearchQuery));
+                
                 return matchKingdom && matchSearch;
             });
 
@@ -1160,67 +1064,56 @@
             emptyState.classList.add('hidden');
 
             const kingdomBadgeStyles = {
-                'Animalia': 'bg-blue-50 text-blue-700 border-blue-200/80 ring-blue-400',
-                'Plantae': 'bg-emerald-50 text-emerald-700 border-emerald-200/80 ring-emerald-400',
-                'Fungi': 'bg-amber-50 text-amber-700 border-amber-200/80 ring-amber-400',
-                'Protista': 'bg-cyan-50 text-cyan-700 border-cyan-200/80 ring-cyan-400',
-                'Monera': 'bg-purple-50 text-purple-700 border-purple-200/80 ring-purple-400'
+                'Animalia': 'bg-blue-900/60 text-blue-200 border-blue-500/50 ring-blue-500/50',
+                'Plantae': 'bg-emerald-900/60 text-emerald-200 border-emerald-500/50 ring-emerald-500/50',
+                'Fungi': 'bg-amber-900/60 text-amber-200 border-amber-500/50 ring-amber-500/50',
+                'Protista': 'bg-cyan-900/60 text-cyan-200 border-cyan-500/50 ring-cyan-500/50',
+                'Monera': 'bg-purple-900/60 text-purple-200 border-purple-500/50 ring-purple-500/50'
             };
 
-            const kingdomNameThMap = {
-                'Animalia': '🐾 อาณาจักรสัตว์',
-                'Plantae': '🌿 อาณาจักรพืช',
-                'Fungi': '🍄 อาณาจักรฟังใจ',
-                'Protista': '💧 อาณาจักรโพรทีสตา',
-                'Monera': '🦠 อาณาจักรมอเนอรา'
+            const displayKingdomMap = {
+                'Animalia': '🐾 สัตว์',
+                'Plantae': '🌿 พืช',
+                'Fungi': '🍄 ฟังใจ',
+                'Protista': '💧 โพรทีสตา',
+                'Monera': '🦠 มอเนอรา'
             };
 
             grid.innerHTML = filtered.map(item => {
                 const originalIndex = taxonomyData.indexOf(item);
-                const badgeStyle = kingdomBadgeStyles[item.kingdom] || 'bg-slate-50 text-slate-700 border-slate-200 ring-slate-400';
-                const kingdomLabel = kingdomNameThMap[item.kingdom] || item.kingdom;
-                // Use species specific image natively, else fallback to kingdom image
+                const badgeStyle = kingdomBadgeStyles[item.kingdom] || 'bg-slate-800 text-slate-200 border-slate-600 ring-slate-500/50';
+                const kingdomLabel = displayKingdomMap[item.kingdom] || item.kingdom;
                 const coverImg = item.imageUrl || kingdomImages[item.kingdom];
                 
                 return `
-                    <div class="bg-white rounded-3xl overflow-hidden shadow-2xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative ring-1 ${badgeStyle.split(' ')[3]} ring-opacity-50">
+                    <div class="bg-slate-800/80 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative ring-1 ${badgeStyle.split(' ')[3]} ring-opacity-30 backdrop-blur-md">
                         <div>
-                            <!-- Card Image Banner with badge overlay -->
-                            <div class="relative h-44 w-full bg-slate-100 overflow-hidden">
-                                <img src="${coverImg}" alt="${item.sciName}" onerror="this.src='${kingdomImages[item.kingdom]}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent pointer-events-none"></div>
+                            <div class="relative h-44 w-full bg-slate-900 overflow-hidden">
+                                <img src="${coverImg}" alt="${item.sciName}" onerror="this.src='${kingdomImages[item.kingdom]}'" class="w-full h-full object-cover group-hover:scale-110 transition duration-700 opacity-80 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent pointer-events-none"></div>
                                 <div class="absolute top-3 left-3 z-10">
-                                    <span class="text-[11px] font-bold px-3 py-1 rounded-full border shadow-sm ${badgeStyle.split('ring')[0]} bg-white/95 backdrop-blur-xs">
+                                    <span class="text-[11px] font-bold px-3 py-1 rounded-full border shadow-sm ${badgeStyle.split('ring')[0]} backdrop-blur-sm">
                                         ${kingdomLabel}
                                     </span>
                                 </div>
-                                <div class="absolute top-3 right-3 z-10 flex items-center space-x-1 bg-slate-900/60 backdrop-blur-md px-2 py-1 rounded-xl opacity-0 group-hover:opacity-100 transition duration-200">
-                                    <button onclick="openEditModal(${originalIndex})" class="p-1.5 text-white hover:text-emerald-300 transition" title="แก้ไข">
-                                        <i class="fa-solid fa-pen text-xs"></i>
-                                    </button>
-                                    <button onclick="deleteItem(${originalIndex})" class="p-1.5 text-white hover:text-rose-300 transition" title="ลบ">
-                                        <i class="fa-solid fa-trash text-xs"></i>
-                                    </button>
-                                </div>
-                                <!-- Very Large Centered Scientific Name inside Image Banner -->
                                 <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none z-0 pt-6">
                                     <h3 class="font-black text-2xl sm:text-3xl italic tracking-wide text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] leading-tight">${item.sciName}</h3>
-                                    <p class="text-sm font-bold text-emerald-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-1.5 bg-slate-900/40 px-3 py-0.5 rounded-full backdrop-blur-sm">${item.commonName || ''}</p>
+                                    <p class="text-sm font-bold text-emerald-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mt-1.5 bg-slate-900/60 px-3 py-0.5 rounded-full backdrop-blur-md">${item.commonName || ''}</p>
                                 </div>
                             </div>
                             
                             <div class="p-4">
-                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-light">${item.description || 'ไม่มีคำอธิบายเพิ่มเติม'}</p>
+                                <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-light group-hover:text-slate-300 transition">${item.description || 'ไม่มีคำอธิบายเพิ่มเติม'}</p>
                             </div>
                         </div>
                         
-                        <div class="px-4 pb-4 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div class="px-4 pb-4 pt-2 border-t border-slate-700/50 flex items-center justify-between text-xs">
                             ${item.wikiUrl ? `
-                            <a href="${item.wikiUrl}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1.5 bg-blue-50/80 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition">
+                            <a href="${item.wikiUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center space-x-1.5 bg-blue-900/20 hover:bg-blue-900/40 border border-blue-800/50 px-3 py-1.5 rounded-xl transition">
                                 <i class="fa-solid fa-external-link-alt text-[10px]"></i>
                                 <span>ดูข้อมูล/รูปเพิ่ม</span>
                             </a>` : '<span></span>'}
-                            <button onclick="openDetailModal(${originalIndex})" class="text-emerald-700 hover:text-emerald-800 font-bold flex items-center space-x-1.5 transition bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl">
+                            <button onclick="openDetailModal(${originalIndex})" class="text-emerald-400 hover:text-emerald-300 font-bold flex items-center space-x-1.5 transition bg-emerald-900/20 hover:bg-emerald-900/40 border border-emerald-800/50 px-3 py-1.5 rounded-xl">
                                 <span>แผนผัง Taxon</span>
                                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
                             </button>
@@ -1232,31 +1125,23 @@
 
         function openDetailModal(index) {
             const item = taxonomyData[index];
-            const kingdomNameThMap = {
-                'Animalia': 'อาณาจักรสัตว์ (Animalia)',
-                'Plantae': 'อาณาจักรพืช (Plantae)',
-                'Fungi': 'อาณาจักรฟังใจ (Fungi)',
-                'Protista': 'อาณาจักรโพรทีสตา (Protista)',
-                'Monera': 'อาณาจักรมอเนอรา (Monera)'
-            };
             const coverImg = item.imageUrl || kingdomImages[item.kingdom];
 
             document.getElementById('modalTitle').innerText = `รายละเอียดอนุกรมวิธาน`;
             
             const content = document.getElementById('modalContentBody');
             content.innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 items-center bg-gradient-to-br from-slate-50 to-emerald-50/30 p-5 rounded-3xl border border-slate-100 shadow-inner">
-                    <div class="h-40 sm:h-full w-full rounded-2xl overflow-hidden bg-slate-200 border border-slate-200/60 shadow-sm relative group">
-                        <img src="${coverImg}" alt="${item.sciName}" onerror="this.src='${kingdomImages[item.kingdom]}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 items-center bg-slate-900/50 p-5 rounded-3xl border border-slate-700 shadow-inner">
+                    <div class="h-40 sm:h-full w-full rounded-2xl overflow-hidden bg-slate-800 border border-slate-700 shadow-sm relative group">
+                        <img src="${coverImg}" alt="${item.sciName}" onerror="this.src='${kingdomImages[item.kingdom]}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-90">
                     </div>
                     <div class="sm:col-span-2 space-y-2 text-center sm:text-left flex flex-col justify-center h-full">
-                        <!-- Very Large Centered/Highlighted Scientific Name in Modal -->
-                        <h4 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-800 italic tracking-tight drop-shadow-sm leading-tight">${item.sciName}</h4>
-                        <p class="text-base sm:text-lg text-emerald-600 font-bold tracking-wide">${item.commonName || ''}</p>
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-light mt-2 max-w-lg mx-auto sm:mx-0">${item.description || 'ไม่มีข้อมูลคำอธิบาย'}</p>
+                        <h4 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white italic tracking-tight drop-shadow-sm leading-tight">${item.sciName}</h4>
+                        <p class="text-base sm:text-lg text-emerald-400 font-bold tracking-wide">${item.commonName || ''}</p>
+                        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed font-light mt-2 max-w-lg mx-auto sm:mx-0">${item.description || 'ไม่มีข้อมูลคำอธิบาย'}</p>
                         ${item.wikiUrl ? `
                         <div class="pt-3">
-                            <a href="${item.wikiUrl}" target="_blank" class="inline-flex items-center space-x-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-4 py-2 rounded-xl shadow-md transition transform hover:-translate-y-0.5">
+                            <a href="${item.wikiUrl}" target="_blank" class="inline-flex items-center space-x-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 px-4 py-2 rounded-xl shadow-md transition transform hover:-translate-y-0.5 border border-blue-500/50">
                                 <i class="fa-solid fa-book-open"></i>
                                 <span>ดูข้อมูลเพิ่มเติมบน Wikipedia</span>
                             </a>
@@ -1265,40 +1150,40 @@
                 </div>
 
                 <div>
-                    <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">ลำดับขั้นอนุกรมวิธานสิ่งมีชีวิต (Taxonomic Hierarchy - Taxon)</h4>
+                    <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">ลำดับขั้นอนุกรมวิธานสิ่งมีชีวิต (Taxonomic Hierarchy - Taxon)</h4>
                     <div class="space-y-2.5">
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-globe w-5 text-emerald-600 text-sm"></i> <span>อาณาจักร (Kingdom)</span></span>
-                            <span class="font-bold text-slate-800">${kingdomNameThMap[item.kingdom] || item.kingdom}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-globe w-5 text-emerald-500 text-sm"></i> <span>อาณาจักร (Kingdom)</span></span>
+                            <span class="font-bold text-slate-200">${kingdomNameThMap[item.kingdom] || item.kingdom}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-code-branch w-5 text-emerald-600 text-sm"></i> <span>ไฟลัม / ดิวิชัน (Phylum / Division)</span></span>
-                            <span class="font-bold text-slate-800">${item.phylum || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-code-branch w-5 text-emerald-500 text-sm"></i> <span>ไฟลัม / ดิวิชัน (Phylum / Division)</span></span>
+                            <span class="font-bold text-slate-200">${item.phylum || '-'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-layer-group w-5 text-emerald-600 text-sm"></i> <span>ชั้น (Class)</span></span>
-                            <span class="font-bold text-slate-800">${item.class || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-layer-group w-5 text-emerald-500 text-sm"></i> <span>ชั้น (Class)</span></span>
+                            <span class="font-bold text-slate-200">${item.class || '-'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-list-ul w-5 text-emerald-600 text-sm"></i> <span>อันดับ (Order)</span></span>
-                            <span class="font-bold text-slate-800">${item.order || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-list-ul w-5 text-emerald-500 text-sm"></i> <span>อันดับ (Order)</span></span>
+                            <span class="font-bold text-slate-200">${item.order || '-'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-users w-5 text-emerald-600 text-sm"></i> <span>วงศ์ (Family)</span></span>
-                            <span class="font-bold text-slate-800">${item.family || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-users w-5 text-emerald-500 text-sm"></i> <span>วงศ์ (Family)</span></span>
+                            <span class="font-bold text-slate-200">${item.family || '-'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-fingerprint w-5 text-emerald-600 text-sm"></i> <span>สกุล (Genus)</span></span>
-                            <span class="font-bold text-slate-800">${item.genus || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-fingerprint w-5 text-emerald-500 text-sm"></i> <span>สกุล (Genus)</span></span>
+                            <span class="font-bold text-slate-200">${item.genus || '-'}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                            <span class="text-slate-600 font-semibold flex items-center space-x-2"><i class="fa-solid fa-dna w-5 text-emerald-600 text-sm"></i> <span>สปีชีส์ (Species)</span></span>
-                            <span class="font-bold text-slate-800 italic">${item.species || '-'}</span>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/60 rounded-2xl border border-slate-700/80 text-xs">
+                            <span class="text-slate-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-dna w-5 text-emerald-500 text-sm"></i> <span>สปีชีส์ (Species)</span></span>
+                            <span class="font-bold text-slate-200 italic">${item.species || '-'}</span>
                         </div>
                         ${item.subLevel && item.subLevel !== '-' ? `
-                        <div class="flex items-center justify-between p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs">
-                            <span class="text-emerald-800 font-semibold flex items-center space-x-2"><i class="fa-solid fa-tag w-5 text-emerald-600 text-sm"></i> <span>ขั้นย่อยพิเศษ (Super / Sub Taxon)</span></span>
-                            <span class="font-bold text-emerald-900">${item.subLevel}</span>
+                        <div class="flex items-center justify-between p-3 bg-emerald-900/30 rounded-2xl border border-emerald-700/50 text-xs">
+                            <span class="text-emerald-400 font-semibold flex items-center space-x-2"><i class="fa-solid fa-tag w-5 text-emerald-500 text-sm"></i> <span>ขั้นย่อยพิเศษ (Super / Sub Taxon)</span></span>
+                            <span class="font-bold text-emerald-300">${item.subLevel}</span>
                         </div>` : ''}
                     </div>
                 </div>
@@ -1310,91 +1195,127 @@
             document.getElementById('detailModal').classList.add('hidden');
         }
 
-        function openAddModal() {
-            document.getElementById('formModalTitle').innerText = "เพิ่มข้อมูลอนุกรมวิธาน";
-            document.getElementById('editIndex').value = -1;
-            document.getElementById('taxonomyForm').reset();
-            document.getElementById('formModal').classList.remove('hidden');
-        }
+        function initCanvasBackground() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let width, height;
+            let particles = [];
+            let mouse = { x: null, y: null, radius: 120 };
 
-        function openEditModal(index) {
-            const item = taxonomyData[index];
-            document.getElementById('formModalTitle').innerText = "แก้ไขข้อมูลอนุกรมวิธาน";
-            document.getElementById('editIndex').value = index;
-
-            document.getElementById('sciNameInput').value = item.sciName;
-            document.getElementById('commonNameInput').value = item.commonName || '';
-            document.getElementById('kingdomInput').value = item.kingdom;
-            document.getElementById('phylumInput').value = item.phylum || '';
-            document.getElementById('classInput').value = item.class || '';
-            document.getElementById('orderInput').value = item.order || '';
-            document.getElementById('familyInput').value = item.family || '';
-            document.getElementById('genusInput').value = item.genus || '';
-            document.getElementById('speciesInput').value = item.species || '';
-            document.getElementById('subLevelInput').value = item.subLevel || '';
-            document.getElementById('imageUrlInput').value = item.imageUrl || '';
-            document.getElementById('wikiUrlInput').value = item.wikiUrl || '';
-            document.getElementById('descInput').value = item.description || '';
-
-            document.getElementById('formModal').classList.remove('hidden');
-        }
-
-        function closeFormModal() {
-            document.getElementById('formModal').classList.add('hidden');
-        }
-
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            const index = parseInt(document.getElementById('editIndex').value);
-
-            const newItem = {
-                sciName: document.getElementById('sciNameInput').value.trim(),
-                commonName: document.getElementById('commonNameInput').value.trim(),
-                kingdom: document.getElementById('kingdomInput').value,
-                phylum: document.getElementById('phylumInput').value.trim(),
-                class: document.getElementById('classInput').value.trim(),
-                order: document.getElementById('orderInput').value.trim(),
-                family: document.getElementById('familyInput').value.trim(),
-                genus: document.getElementById('genusInput').value.trim(),
-                species: document.getElementById('speciesInput').value.trim(),
-                subLevel: document.getElementById('subLevelInput').value.trim(),
-                imageUrl: document.getElementById('imageUrlInput').value.trim(),
-                wikiUrl: document.getElementById('wikiUrlInput').value.trim(),
-                description: document.getElementById('descInput').value.trim()
-            };
-
-            if (index === -1) {
-                taxonomyData.unshift(newItem);
-                showToast("เพิ่มข้อมูลอนุกรมวิธานสำเร็จ");
-            } else {
-                taxonomyData[index] = newItem;
-                showToast("อัปเดตข้อมูลอนุกรมวิธานสำเร็จ");
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
             }
 
-            closeFormModal();
-            renderDashboard();
-        }
+            window.addEventListener('resize', resize);
+            resize();
 
-        function deleteItem(index) {
-            if (confirm(`คุณต้องการลบข้อมูล "${taxonomyData[index].sciName}" หรือไม่?`)) {
-                taxonomyData.splice(index, 1);
-                showToast("ลบข้อมูลสำเร็จ", "fa-trash text-rose-400");
-                renderDashboard();
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = e.x;
+                mouse.y = e.y;
+            });
+            window.addEventListener('mouseout', () => {
+                mouse.x = null;
+                mouse.y = null;
+            });
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.baseX = this.x;
+                    this.baseY = this.y;
+                    this.density = (Math.random() * 15) + 2;
+                    this.vx = (Math.random() - 0.5) * 1;
+                    this.vy = (Math.random() - 0.5) * 1;
+                }
+                
+                draw() {
+                    ctx.fillStyle = 'rgba(52, 211, 153, 0.4)'; // Emerald color
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                    if (this.y < 0 || this.y > height) this.vy = -this.vy;
+
+                    // Mouse interaction
+                    if (mouse.x != null) {
+                        let dx = mouse.x - this.x;
+                        let dy = mouse.y - this.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+                        let forceDirectionX = dx / distance;
+                        let forceDirectionY = dy / distance;
+                        let maxDistance = mouse.radius;
+                        let force = (maxDistance - distance) / maxDistance;
+                        let directionX = forceDirectionX * force * this.density;
+                        let directionY = forceDirectionY * force * this.density;
+
+                        if (distance < mouse.radius) {
+                            this.x -= directionX;
+                            this.y -= directionY;
+                        } else {
+                            if (this.x !== this.baseX) {
+                                let dx = this.x - this.baseX;
+                                this.x -= dx / 20;
+                            }
+                            if (this.y !== this.baseY) {
+                                let dy = this.y - this.baseY;
+                                this.y -= dy / 20;
+                            }
+                        }
+                    }
+                }
             }
-        }
 
-        function showToast(message, iconClass = "fa-solid fa-check text-emerald-400 text-base") {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
+            function init() {
+                particles = [];
+                let numberOfParticles = (width * height) / 12000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particles.push(new Particle());
+                }
+            }
 
-            toastMsg.innerText = message;
-            toastIcon.className = iconClass;
+            function connect() {
+                for (let a = 0; a < particles.length; a++) {
+                    for (let b = a; b < particles.length; b++) {
+                        let dx = particles[a].x - particles[b].x;
+                        let dy = particles[a].y - particles[b].y;
+                        let distance = dx * dx + dy * dy;
 
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3000);
+                        if (distance < (width / 15) * (height / 15)) {
+                            let opacity = 1 - (distance / 10000);
+                            ctx.strokeStyle = 'rgba(52, 211, 153, ' + opacity * 0.15 + ')';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[a].x, particles[a].y);
+                            ctx.lineTo(particles[b].x, particles[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                connect();
+                requestAnimationFrame(animate);
+            }
+
+            init();
+            animate();
         }
     </script>
 </body>
